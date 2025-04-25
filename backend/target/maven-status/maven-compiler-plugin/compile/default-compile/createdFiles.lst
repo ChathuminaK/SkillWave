@@ -1,1 +1,9 @@
+com\example\SkillWave\model\LearningPlan.class
+com\example\SkillWave\repository\LearningPlanRepository.class
+com\example\SkillWave\service\LearningPlanService.class
+com\example\SkillWave\exception\LearningPlanNotFoundException.class
+com\example\SkillWave\service\LearningPlanServiceImpl.class
+com\example\SkillWave\security\SecurityConfig.class
 com\example\SkillWave\SkillWaveApplication.class
+com\example\SkillWave\config\WebConfig.class
+com\example\SkillWave\controller\LearningPlanController.class
