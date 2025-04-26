@@ -35,14 +35,42 @@ public class LearningPlanServiceImpl implements LearningPlanService {
 
     @Override
     public LearningPlan updateLearningPlan(Long id, LearningPlan learningPlan) {
+        if (id == null) {
+            throw new IllegalArgumentException("Learning plan ID cannot be null");
+        }
+        
+        if (learningPlan == null) {
+            throw new IllegalArgumentException("Learning plan cannot be null");
+        }
+        
         LearningPlan existingLearningPlan = learningPlanRepository.findById(id)
-                .orElseThrow(() -> new LearningPlanNotFoundException(id));
+                .orElseThrow(() -> new RuntimeException("Learning plan not found with id: " + id));
 
-        existingLearningPlan.setTitle(learningPlan.getTitle());
-        existingLearningPlan.setDescription(learningPlan.getDescription());
-        existingLearningPlan.setTopics(learningPlan.getTopics());
-        existingLearningPlan.setResources(learningPlan.getResources());
-        existingLearningPlan.setTimeline(learningPlan.getTimeline());
+        // Update basic fields with null checks
+        if (learningPlan.getTitle() != null) {
+            existingLearningPlan.setTitle(learningPlan.getTitle());
+        }
+        
+        if (learningPlan.getDescription() != null) {
+            existingLearningPlan.setDescription(learningPlan.getDescription());
+        }
+        
+        if (learningPlan.getTopics() != null) {
+            existingLearningPlan.setTopics(learningPlan.getTopics());
+        }
+        
+        if (learningPlan.getResources() != null) {
+            existingLearningPlan.setResources(learningPlan.getResources());
+        }
+        
+        if (learningPlan.getTimeline() != null) {
+            existingLearningPlan.setTimeline(learningPlan.getTimeline());
+        }
+        
+        // Handle mediaUrls with null checks
+        if (learningPlan.getMediaUrls() != null) {
+            existingLearningPlan.setMediaUrls(learningPlan.getMediaUrls());
+        }
 
         return learningPlanRepository.save(existingLearningPlan);
     }
@@ -50,5 +78,13 @@ public class LearningPlanServiceImpl implements LearningPlanService {
     @Override
     public void deleteLearningPlan(Long id) {
         learningPlanRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        if (id == null) {
+            return false;
+        }
+        return learningPlanRepository.existsById(id);
     }
 }

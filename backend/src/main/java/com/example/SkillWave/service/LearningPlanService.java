@@ -9,4 +9,5 @@ public interface LearningPlanService {
     LearningPlan createLearningPlan(LearningPlan learningPlan);
     LearningPlan updateLearningPlan(Long id, LearningPlan learningPlan);
     void deleteLearningPlan(Long id);
+    boolean existsById(Long id); // Add this method
 }

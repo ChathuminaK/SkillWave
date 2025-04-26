@@ -39,6 +39,83 @@ const LearningPlanDetail = () => {
     }
   };
 
+  // Helper to render media content
+  const renderMediaContent = () => {
+    if (!learningPlan.mediaUrls || learningPlan.mediaUrls.length === 0) {
+      return null;
+    }
+
+    if (learningPlan.mediaUrls.length === 1) {
+      // Single media item
+      const url = learningPlan.mediaUrls[0];
+      return (
+        <div className="mb-4">
+          {url.endsWith('.mp4') || url.endsWith('.webm') ? (
+            <div className="ratio ratio-16x9">
+              <video className="rounded" controls>
+                <source src={url} type={url.endsWith('.mp4') ? 'video/mp4' : 'video/webm'} />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          ) : (
+            <img 
+              src={url} 
+              className="img-fluid rounded mb-3" 
+              alt="Learning plan attachment" 
+            />
+          )}
+        </div>
+      );
+    } else {
+      // Multiple media items - create a carousel
+      return (
+        <div id={`planCarousel-${id}`} className="carousel slide mb-4" data-bs-ride="carousel">
+          <div className="carousel-indicators">
+            {learningPlan.mediaUrls.map((_, index) => (
+              <button 
+                key={index}
+                type="button" 
+                data-bs-target={`#planCarousel-${id}`} 
+                data-bs-slide-to={index} 
+                className={index === 0 ? "active" : ""}
+                aria-current={index === 0 ? "true" : "false"}
+                aria-label={`Slide ${index + 1}`}
+              ></button>
+            ))}
+          </div>
+          <div className="carousel-inner rounded">
+            {learningPlan.mediaUrls.map((url, index) => (
+              <div key={index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
+                {url.endsWith('.mp4') || url.endsWith('.webm') ? (
+                  <div className="ratio ratio-16x9">
+                    <video className="d-block w-100" controls>
+                      <source src={url} type={url.endsWith('.mp4') ? 'video/mp4' : 'video/webm'} />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                ) : (
+                  <img 
+                    src={url} 
+                    className="d-block w-100" 
+                    alt={`Learning plan attachment ${index + 1}`} 
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+          <button className="carousel-control-prev" type="button" data-bs-target={`#planCarousel-${id}`} data-bs-slide="prev">
+            <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span className="visually-hidden">Previous</span>
+          </button>
+          <button className="carousel-control-next" type="button" data-bs-target={`#planCarousel-${id}`} data-bs-slide="next">
+            <span className="carousel-control-next-icon" aria-hidden="true"></span>
+            <span className="visually-hidden">Next</span>
+          </button>
+        </div>
+      );
+    }
+  };
+
   if (loading) {
     return <LoadingSpinner message="Loading learning plan..." />;
   }
@@ -80,6 +157,9 @@ const LearningPlanDetail = () => {
             </button>
           </div>
         </div>
+        
+        {/* Render media content if available */}
+        {renderMediaContent()}
         
         <div className="row mt-4">
           <div className="col-md-6 mb-4 mb-md-0">
