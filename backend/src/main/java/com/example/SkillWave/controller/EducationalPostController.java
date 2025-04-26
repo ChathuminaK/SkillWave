@@ -1,7 +1,9 @@
 package com.example.SkillWave.controller;
 
 import com.example.SkillWave.model.EducationalPost;
+import com.example.SkillWave.model.Progress;
 import com.example.SkillWave.service.EducationalPostService;
+import com.example.SkillWave.service.ProgressService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,6 +26,9 @@ public class EducationalPostController {
     
     @Autowired
     private EducationalPostService postService;
+    
+    @Autowired
+    private ProgressService progressService;
     
     @Autowired
     private ObjectMapper objectMapper;
@@ -321,4 +326,47 @@ public class EducationalPostController {
         return ResponseEntity.ok(tags);
     }
     
+    @GetMapping("/{id}/progress/{userId}")
+    public ResponseEntity<?> getPostProgressForUser(
+            @PathVariable Long id, 
+            @PathVariable String userId) {
+        
+        // First check if the post exists
+        EducationalPost post = postService.getPostById(id);
+        
+        // Then get or initialize the progress
+        Progress progress = progressService.getProgressByUserAndContent(userId, id, "EDUCATIONAL_POST")
+                .orElse(new Progress());
+        
+        // If no progress exists yet, initialize basic information
+        if (progress.getId() == null) {
+            progress.setUserId(userId);
+            progress.setContentId(id);
+            progress.setContentType("EDUCATIONAL_POST");
+            progress.setProgressPercentage(0);
+            progress.setCompleted(false);
+        }
+        
+        // Return a response combining post and progress data
+        Map<String, Object> response = new HashMap<>();
+        response.put("post", post);
+        response.put("progress", progress);
+        
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}/progress/{userId}/{percentage}")
+    public ResponseEntity<Progress> updatePostProgress(
+            @PathVariable Long id,
+            @PathVariable String userId,
+            @PathVariable Integer percentage) {
+        
+        // First check if the post exists
+        EducationalPost post = postService.getPostById(id);
+        
+        // Update the progress
+        Progress updatedProgress = progressService.updateProgressPercentage(userId, id, "EDUCATIONAL_POST", percentage);
+        
+        return ResponseEntity.ok(updatedProgress);
+    }
 }

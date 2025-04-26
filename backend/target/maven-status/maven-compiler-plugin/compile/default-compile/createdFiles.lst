@@ -1,5 +1,7 @@
 com\example\SkillWave\model\PostComment.class
 com\example\SkillWave\exception\GlobalExceptionHandler.class
+com\example\SkillWave\model\Progress.class
+com\example\SkillWave\controller\ProgressController.class
 com\example\SkillWave\exception\ResourceNotFoundException.class
 com\example\SkillWave\repository\EducationalPostRepository.class
 com\example\SkillWave\controller\TestController.class
@@ -12,9 +14,12 @@ com\example\SkillWave\service\EducationalPostService.class
 com\example\SkillWave\exception\LearningPlanNotFoundException.class
 com\example\SkillWave\service\MediaService.class
 com\example\SkillWave\security\SecurityConfig.class
+com\example\SkillWave\service\impl\ProgressServiceImpl.class
 com\example\SkillWave\service\PostCommentService.class
+com\example\SkillWave\service\ProgressService.class
 com\example\SkillWave\repository\LearningPlanRepository.class
 com\example\SkillWave\service\LearningPlanService.class
+com\example\SkillWave\repository\ProgressRepository.class
 com\example\SkillWave\SkillWaveApplication.class
 com\example\SkillWave\controller\PostCommentController.class
 com\example\SkillWave\config\DatabaseConfig.class

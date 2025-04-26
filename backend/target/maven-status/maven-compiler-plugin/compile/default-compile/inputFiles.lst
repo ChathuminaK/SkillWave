@@ -5,6 +5,7 @@ C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\Skill
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\controller\LearningPlanController.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\controller\MediaController.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\controller\PostCommentController.java
+C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\controller\ProgressController.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\controller\TestController.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\exception\GlobalExceptionHandler.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\exception\GlobalExceptionHandlerTest.java
@@ -13,15 +14,19 @@ C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\Skill
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\model\EducationalPost.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\model\LearningPlan.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\model\PostComment.java
+C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\model\Progress.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\repository\EducationalPostRepository.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\repository\LearningPlanRepository.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\repository\PostCommentRepository.java
+C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\repository\ProgressRepository.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\security\SecurityConfig.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\service\EducationalPostService.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\service\impl\EducationalPostServiceImpl.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\service\impl\PostCommentServiceImpl.java
+C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\service\impl\ProgressServiceImpl.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\service\LearningPlanService.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\service\LearningPlanServiceImpl.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\service\MediaService.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\service\PostCommentService.java
+C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\service\ProgressService.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\SkillWaveApplication.java
