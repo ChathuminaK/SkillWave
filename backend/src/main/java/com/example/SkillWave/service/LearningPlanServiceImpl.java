@@ -72,6 +72,8 @@ public class LearningPlanServiceImpl implements LearningPlanService {
             existingLearningPlan.setMediaUrls(learningPlan.getMediaUrls());
         }
 
+        existingLearningPlan.setTimeline(learningPlan.getTimeline());
+
         return learningPlanRepository.save(existingLearningPlan);
     }
 

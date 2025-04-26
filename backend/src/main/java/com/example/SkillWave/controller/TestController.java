@@ -55,6 +55,27 @@ public class TestController {
         }
     }
 
+    @PostMapping("/test-plan")
+    public ResponseEntity<LearningPlan> testPlan() {
+        try {
+            // Create a sample learning plan
+            LearningPlan plan = new LearningPlan();
+            plan.setTitle("Test Plan");
+            plan.setDescription("This is a test learning plan");
+            plan.setTopics(Arrays.asList("Test Topic 1", "Test Topic 2"));
+            plan.setResources(Arrays.asList("Test Resource 1", "Test Resource 2"));
+            plan.setTimeline("Sample timeline - Week 1: Basics, Week 2: Advanced");
+            
+            // Save the plan to get an ID
+            LearningPlan savedPlan = learningPlanService.createLearningPlan(plan);
+            
+            return ResponseEntity.ok(savedPlan);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
+    }
+
     @GetMapping("/ping")
     public Map<String, Object> ping() {
         Map<String, Object> response = new HashMap<>();

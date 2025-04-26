@@ -39,8 +39,9 @@ public class LearningPlanController {
     }
 
     @PostMapping
-    public LearningPlan createLearningPlan(@RequestBody LearningPlan learningPlan) {
-        return learningPlanService.createLearningPlan(learningPlan);
+    public ResponseEntity<LearningPlan> createLearningPlan(@RequestBody LearningPlan learningPlan) {
+        learningPlan.setTimeline(learningPlan.getTimeline());
+        return ResponseEntity.ok(learningPlanService.createLearningPlan(learningPlan));
     }
     
     @PostMapping("/with-media")
@@ -90,6 +91,7 @@ public class LearningPlanController {
     @PutMapping("/{id}")
     public ResponseEntity<LearningPlan> updateLearningPlan(@PathVariable Long id, @RequestBody LearningPlan learningPlan) {
         LearningPlan updatedPlan = learningPlanService.updateLearningPlan(id, learningPlan);
+        updatedPlan.setTimeline(learningPlan.getTimeline() != null ? learningPlan.getTimeline() : "");
         return ResponseEntity.ok(updatedPlan);
     }
     
