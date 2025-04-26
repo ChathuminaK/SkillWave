@@ -1,6 +1,7 @@
 package com.example.SkillWave.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -8,23 +9,25 @@ public class LearningPlan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String title;
-    private String description;
+    
+    private String title = "";  // Initialize with empty string instead of null
+    
+    @Column(length = 1000)
+    private String description = "";  // Initialize with empty string instead of null
+    
     @ElementCollection
-    private List<String> topics;
+    private List<String> topics = new ArrayList<>();
+    
     @ElementCollection
-    private List<String> resources;
-    private String timeline;
+    private List<String> resources = new ArrayList<>();
+    
+    private String timeline = "";  // Initialize with empty string instead of null
+    
+    @ElementCollection
+    private List<String> mediaUrls = new ArrayList<>();
 
-    // Constructors, getters, and setters
-    public LearningPlan() {}
-
-    public LearningPlan(String title, String description, List<String> topics, List<String> resources, String timeline) {
-        this.title = title;
-        this.description = description;
-        this.topics = topics;
-        this.resources = resources;
-        this.timeline = timeline;
+    // Default constructor
+    public LearningPlan() {
     }
 
     // Getters and setters
@@ -74,5 +77,13 @@ public class LearningPlan {
 
     public void setTimeline(String timeline) {
         this.timeline = timeline;
+    }
+
+    public List<String> getMediaUrls() {
+        return mediaUrls;
+    }
+
+    public void setMediaUrls(List<String> mediaUrls) {
+        this.mediaUrls = mediaUrls;
     }
 }
