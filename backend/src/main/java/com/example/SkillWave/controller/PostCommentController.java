@@ -23,6 +23,7 @@ public class PostCommentController {
     @Autowired
     private PostCommentService commentService;
     
+    //Get all comments for a specific post.
     // Get comments for a post
     @GetMapping("/post/{postId}")
     public ResponseEntity<List<PostComment>> getCommentsByPostId(@PathVariable Long postId) {
@@ -31,7 +32,7 @@ public class PostCommentController {
     }
     
     // Get comments for a post with pagination
-    //Get comment
+    //Get paginated and sorted comments for a specific post.
     @GetMapping("/post/{postId}/paginated")
     public ResponseEntity<Map<String, Object>> getCommentsByPostIdPaginated(
             @PathVariable Long postId,
@@ -54,7 +55,8 @@ public class PostCommentController {
         return ResponseEntity.ok(response);
     }
     
-    // Get comment by ID
+
+    //get comment by id
     @GetMapping("/{id}")
     public ResponseEntity<PostComment> getCommentById(@PathVariable Long id) {
         try {
