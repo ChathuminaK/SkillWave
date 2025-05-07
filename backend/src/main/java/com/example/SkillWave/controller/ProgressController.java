@@ -150,6 +150,24 @@ public class ProgressController {
         return ResponseEntity.ok(summary);
     }
     
+    @GetMapping("/user/{userId}/learning-plans")
+    public ResponseEntity<Map<String, Object>> getLearningPlanProgress(
+            @PathVariable String userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "lastAccessed"));
+        Page<Progress> progressPage = progressService.getLearningPlanProgress(userId, pageable);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("progress", progressPage.getContent());
+        response.put("currentPage", progressPage.getNumber());
+        response.put("totalItems", progressPage.getTotalElements());
+        response.put("totalPages", progressPage.getTotalPages());
+        
+        return ResponseEntity.ok(response);
+    }
+    
     @PutMapping("/{id}")
     public ResponseEntity<Progress> updateProgress(
             @PathVariable Long id,

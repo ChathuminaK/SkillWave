@@ -185,4 +185,9 @@ public class ProgressServiceImpl implements ProgressService {
         
         return progressRepository.save(progress);
     }
+
+    @Override
+    public Page<Progress> getLearningPlanProgress(String userId, Pageable pageable) {
+        return progressRepository.findByUserIdAndContentType(userId, "LEARNING_PLAN", pageable);
+    }
 }

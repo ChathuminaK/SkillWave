@@ -1,17 +1,49 @@
-import React from 'react';
-import Header from './Header';
+import React, { useState } from 'react';
+import MainHeader from './MainHeader';
+import Sidebar from './Sidebar';
 import Footer from './Footer';
 
-const MainLayout = ({ children }) => {
+const MainLayout = ({ children, useSidebar = false }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+  
   return (
-    <div className="d-flex flex-column min-vh-100">
-      <Header />
-      <main className="flex-grow-1">
-        <div className="container-fluid py-4 page-container">
-          {children}
-        </div>
-      </main>
-      <Footer />
+    <div className={`app-container ${useSidebar ? 'with-sidebar' : ''}`}>
+      {useSidebar ? (
+        <>
+          <div className={`sidebar-wrapper ${sidebarOpen ? 'open' : 'closed'}`}>
+            <Sidebar />
+          </div>
+          <div className="main-content-wrapper">
+            <button 
+              className="sidebar-toggle btn btn-sm btn-light"
+              onClick={toggleSidebar}
+              aria-label="Toggle Sidebar"
+            >
+              <i className={`bi bi-${sidebarOpen ? 'chevron-left' : 'chevron-right'}`}></i>
+            </button>
+            <main>
+              <div className="container-fluid py-4">
+                {children}
+              </div>
+            </main>
+            <Footer />
+          </div>
+        </>
+      ) : (
+        <>
+          <MainHeader />
+          <main>
+            <div className="container py-4">
+              {children}
+            </div>
+          </main>
+          <Footer />
+        </>
+      )}
     </div>
   );
 };

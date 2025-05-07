@@ -41,4 +41,6 @@ public interface ProgressService {
     Progress updateProgressPercentage(String userId, Long contentId, String contentType, Integer percentage);
     
     Progress resetProgress(String userId, Long contentId, String contentType);
+    
+    Page<Progress> getLearningPlanProgress(String userId, Pageable pageable);
 }
