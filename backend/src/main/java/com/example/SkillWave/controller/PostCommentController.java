@@ -31,6 +31,7 @@ public class PostCommentController {
     }
     
     // Get comments for a post with pagination
+    //Get comment
     @GetMapping("/post/{postId}/paginated")
     public ResponseEntity<Map<String, Object>> getCommentsByPostIdPaginated(
             @PathVariable Long postId,
