@@ -1,19 +1,23 @@
 package com.example.SkillWave.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "learning_plans")
 public class LearningPlan {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    private String title = "";  // Initialize with empty string instead of null
+    @Column(nullable = false)
+    private String title;
     
-    @Column(length = 1000)
-    private String description = "";  // Initialize with empty string instead of null
+    @Column(nullable = false, length = 2000)
+    private String description;
     
     @ElementCollection
     private List<String> topics = new ArrayList<>();
@@ -21,15 +25,29 @@ public class LearningPlan {
     @ElementCollection
     private List<String> resources = new ArrayList<>();
     
-    private String timeline = "";  // Initialize with empty string instead of null
+    @Column(nullable = false)
+    private String userId;
+    
+    private String userName;
+    
+    @Column(length = 1000)
+    private String timeline;
     
     @ElementCollection
     private List<String> mediaUrls = new ArrayList<>();
-
+    
+    private LocalDateTime targetCompletionDate;
+    
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+    
+    private LocalDateTime updatedAt;
+    
     // Default constructor
     public LearningPlan() {
+        this.createdAt = LocalDateTime.now();
     }
-
+    
     // Getters and setters
     public Long getId() {
         return id;
@@ -71,6 +89,22 @@ public class LearningPlan {
         this.resources = resources;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+    
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public String getTimeline() {
         return timeline;
     }
@@ -85,5 +119,34 @@ public class LearningPlan {
 
     public void setMediaUrls(List<String> mediaUrls) {
         this.mediaUrls = mediaUrls;
+    }
+
+    public LocalDateTime getTargetCompletionDate() {
+        return targetCompletionDate;
+    }
+
+    public void setTargetCompletionDate(LocalDateTime targetCompletionDate) {
+        this.targetCompletionDate = targetCompletionDate;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+    
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

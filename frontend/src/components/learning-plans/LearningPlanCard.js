@@ -1,15 +1,81 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ProgressService } from '../../services/progress.service';
 
 const LearningPlanCard = ({ learningPlan, onDelete }) => {
-  // Helper to render a simple media preview
+  const userId = localStorage.getItem('userId') || 'user123'; // Get from auth context in production
+  const [progress, setProgress] = useState(null);
+  const [loadingProgress, setLoadingProgress] = useState(true);
+
+  useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        setLoadingProgress(true);
+        const data = await ProgressService.getLearningPlanProgress(userId, learningPlan.id);
+        setProgress(data);
+      } catch (error) {
+        console.log('No progress found for this plan');
+      } finally {
+        setLoadingProgress(false);
+      }
+    };
+
+    fetchProgress();
+  }, [userId, learningPlan.id]);
+
+  const renderProgressIndicator = () => {
+    if (loadingProgress) {
+      return <div className="progress-placeholder"></div>;
+    }
+
+    if (!progress) {
+      return (
+        <div className="text-muted small">
+          <i className="bi bi-hourglass me-1"></i> Not started
+        </div>
+      );
+    }
+
+    if (progress.completed) {
+      return (
+        <div className="d-flex align-items-center">
+          <div className="progress flex-grow-1 me-2" style={{ height: '8px' }}>
+            <div 
+              className="progress-bar bg-success" 
+              role="progressbar" 
+              style={{ width: '100%' }}
+              aria-valuenow="100" 
+              aria-valuemin="0" 
+              aria-valuemax="100"
+            ></div>
+          </div>
+          <span className="badge bg-success">Completed</span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="d-flex align-items-center">
+        <div className="progress flex-grow-1 me-2" style={{ height: '8px' }}>
+          <div 
+            className="progress-bar" 
+            role="progressbar" 
+            style={{ width: `${progress.progressPercentage}%` }}
+            aria-valuenow={progress.progressPercentage} 
+            aria-valuemin="0" 
+            aria-valuemax="100"
+          ></div>
+        </div>
+        <span className="text-muted small">{progress.progressPercentage}%</span>
+      </div>
+    );
+  };
+
   const renderMediaPreview = () => {
     if (learningPlan.mediaUrls && learningPlan.mediaUrls.length > 0) {
       const firstMedia = learningPlan.mediaUrls[0];
       
-      // Check if it's an image or video
       if (firstMedia.endsWith('.mp4') || firstMedia.endsWith('.webm')) {
-        // For video, show a thumbnail with a play icon overlay
         return (
           <div className="media-preview position-relative mb-3">
             <div className="ratio ratio-16x9">
@@ -28,7 +94,6 @@ const LearningPlanCard = ({ learningPlan, onDelete }) => {
           </div>
         );
       } else {
-        // For image, show the image
         return (
           <div className="media-preview position-relative mb-3">
             <img 
@@ -51,55 +116,49 @@ const LearningPlanCard = ({ learningPlan, onDelete }) => {
   };
 
   return (
-    <div className="card shadow-sm dashboard-card h-100">
+    <div className="card shadow-sm h-100">
       <div className="card-body">
         <h5 className="card-title">{learningPlan.title}</h5>
         
-        {/* Show media preview if available */}
         {renderMediaPreview()}
         
-        <p className="card-text text-muted">{learningPlan.description}</p>
-        
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <small className="text-muted">Timeline: {learningPlan.timeline}</small>
-          <span className="badge bg-light text-dark">
-            {learningPlan.topics.length} topics
-          </span>
-        </div>
+        <p className="card-text text-muted">
+          {learningPlan.description.length > 100 
+            ? `${learningPlan.description.substring(0, 100)}...` 
+            : learningPlan.description}
+        </p>
         
         <div className="mb-3">
+          {renderProgressIndicator()}
+        </div>
+        
+        <div className="d-flex gap-2 flex-wrap mb-3">
           {learningPlan.topics.slice(0, 3).map((topic, index) => (
-            <span key={index} className="badge topic-badge me-1 mb-1">
+            <span key={index} className="badge bg-light text-dark">
               {topic}
             </span>
           ))}
           {learningPlan.topics.length > 3 && (
-            <span className="badge bg-secondary me-1 mb-1">
-              +{learningPlan.topics.length - 3}
+            <span className="badge bg-light text-dark">
+              +{learningPlan.topics.length - 3} more
             </span>
           )}
         </div>
       </div>
-      <div className="card-footer bg-white border-top-0">
+      <div className="card-footer bg-white">
         <div className="d-flex justify-content-between">
-          <Link 
-            to={`/learning-plans/${learningPlan.id}`}
-            className="btn btn-sm btn-outline-primary"
-          >
-            View Details
+          <Link to={`/learning-plans/${learningPlan.id}`} className="btn btn-sm btn-primary">
+            <i className="bi bi-book me-1"></i> View Plan
           </Link>
-          <div>
-            <Link 
-              to={`/learning-plans/edit/${learningPlan.id}`}
-              className="btn btn-sm btn-outline-secondary me-1"
-            >
-              Edit
+          <div className="btn-group">
+            <Link to={`/learning-plans/edit/${learningPlan.id}`} className="btn btn-sm btn-outline-secondary">
+              <i className="bi bi-pencil"></i>
             </Link>
             <button 
-              className="btn btn-sm btn-outline-danger" 
-              onClick={() => onDelete(learningPlan.id)}
+              onClick={() => onDelete(learningPlan.id)} 
+              className="btn btn-sm btn-outline-danger"
             >
-              Delete
+              <i className="bi bi-trash"></i>
             </button>
           </div>
         </div>

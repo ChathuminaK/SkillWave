@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LearningPlanService } from '../../services/learningPlan.service';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorAlert from '../common/ErrorAlert';
-import axios from 'axios';
 
 const LearningPlanForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = !!id;
+  const formRef = useRef(null);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -22,12 +22,15 @@ const LearningPlanForm = () => {
   const [mediaFiles, setMediaFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [existingMedia, setExistingMedia] = useState([]);
+  const [mediaError, setMediaError] = useState(null);
   
+  // Component states
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [mediaError, setMediaError] = useState(null);
+  const [feedback, setFeedback] = useState(null);
 
+  // Fetch existing plan data if in edit mode
   useEffect(() => {
     const fetchLearningPlan = async () => {
       if (isEditMode) {
@@ -35,19 +38,24 @@ const LearningPlanForm = () => {
           setLoading(true);
           const data = await LearningPlanService.getById(id);
           setFormData({
-            title: data.title,
-            description: data.description,
-            topics: [...data.topics],
-            resources: [...data.resources],
-            timeline: data.timeline
+            title: data.title || '',
+            description: data.description || '',
+            topics: data.topics?.length > 0 ? [...data.topics] : [''],
+            resources: data.resources?.length > 0 ? [...data.resources] : [''],
+            timeline: data.timeline || ''
           });
           
           // If there are existing media files, load them
           if (data.mediaUrls && data.mediaUrls.length > 0) {
             setExistingMedia(data.mediaUrls);
           }
+          
+          setError(null);
         } catch (err) {
-          setError('Failed to load the learning plan for editing.');
+          setError('Failed to load the learning plan for editing. ' + err.message);
+          setTimeout(() => {
+            navigate('/learning-plans');
+          }, 3000);
         } finally {
           setLoading(false);
         }
@@ -55,8 +63,9 @@ const LearningPlanForm = () => {
     };
 
     fetchLearningPlan();
-  }, [id, isEditMode]);
+  }, [id, isEditMode, navigate]);
 
+  // Handle input changes for text fields
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -65,6 +74,7 @@ const LearningPlanForm = () => {
     });
   };
 
+  // Handle array items (topics and resources)
   const handleArrayChange = (index, field, value) => {
     const newArray = [...formData[field]];
     newArray[index] = value;
@@ -74,6 +84,7 @@ const LearningPlanForm = () => {
     });
   };
 
+  // Add a new item to an array field
   const addArrayItem = (field) => {
     setFormData({
       ...formData,
@@ -81,23 +92,22 @@ const LearningPlanForm = () => {
     });
   };
 
+  // Remove an item from an array field
   const removeArrayItem = (field, index) => {
-    if (formData[field].length > 1) {
-      const newArray = formData[field].filter((_, i) => i !== index);
-      setFormData({
-        ...formData,
-        [field]: newArray
-      });
-    }
+    const newArray = [...formData[field]];
+    newArray.splice(index, 1);
+    setFormData({
+      ...formData,
+      [field]: newArray.length === 0 ? [''] : newArray
+    });
   };
 
   // Handle media file selection
   const handleMediaChange = (e) => {
     const files = Array.from(e.target.files);
     
-    // Check if adding these files would exceed the limit
-    const totalFiles = files.length + mediaFiles.length + existingMedia.length;
-    if (totalFiles > 3) {
+    // Check for maximum file count (3 total including existing)
+    if (existingMedia.length + mediaFiles.length + files.length > 3) {
       setMediaError('You can only upload up to 3 files in total');
       return;
     }
@@ -125,6 +135,10 @@ const LearningPlanForm = () => {
           }
         };
         
+        video.onerror = function() {
+          reject(new Error('Could not load video metadata'));
+        };
+        
         video.src = URL.createObjectURL(videoFile);
       });
     };
@@ -139,7 +153,7 @@ const LearningPlanForm = () => {
         
         setMediaFiles(prev => [...prev, ...files]);
         
-        // Create preview URLs for the selected files
+        // Generate preview URLs for the selected files
         const newPreviewUrls = files.map(file => URL.createObjectURL(file));
         setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
         setMediaError(null);
@@ -173,32 +187,62 @@ const LearningPlanForm = () => {
     setExistingMedia(newExistingMedia);
   };
 
+  // Verify the learning plan still exists before submitting an update
   const checkPlanExists = async (id) => {
     try {
       await LearningPlanService.getById(id);
       return true;
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        setError(`This learning plan no longer exists. It may have been deleted.`);
-        return false;
-      }
-      return true; // Assume it exists if we get any other error
+      setError(`This learning plan no longer exists. It may have been deleted.`);
+      return false;
     }
   };
 
+  // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (!formRef.current.checkValidity()) {
+      formRef.current.reportValidity();
+      return;
+    }
+    
     try {
       setSubmitting(true);
+      setError(null);
+      setFeedback(null);
+      
+      // In edit mode, verify the plan still exists
+      if (isEditMode) {
+        const exists = await checkPlanExists(id);
+        if (!exists) {
+          setSubmitting(false);
+          return;
+        }
+      }
+      
+      // Prepare the data - filter out empty values
+      const filteredTopics = formData.topics.filter(topic => topic.trim());
+      const filteredResources = formData.resources.filter(resource => resource.trim());
+      
+      if (filteredTopics.length === 0) {
+        setError('At least one topic is required');
+        setSubmitting(false);
+        return;
+      }
       
       // Create FormData for multipart/form-data
       const formDataToSend = new FormData();
-      formDataToSend.append('title', formData.title);
-      formDataToSend.append('description', formData.description);
-      formDataToSend.append('topics', JSON.stringify(formData.topics));
-      formDataToSend.append('resources', JSON.stringify(formData.resources));
-      formDataToSend.append('timeline', formData.timeline);
+      formDataToSend.append('title', formData.title.trim());
+      formDataToSend.append('description', formData.description.trim());
+      formDataToSend.append('topics', JSON.stringify(filteredTopics));
+      formDataToSend.append('resources', JSON.stringify(filteredResources));
+      formDataToSend.append('timeline', formData.timeline.trim());
+      
+      // Add existing media URLs for edit mode
+      if (isEditMode && existingMedia.length > 0) {
+        formDataToSend.append('existingMedia', JSON.stringify(existingMedia));
+      }
       
       // Add media files
       if (mediaFiles.length > 0) {
@@ -207,26 +251,32 @@ const LearningPlanForm = () => {
         });
       }
       
-      // Use the with-media endpoint
-      const response = await axios.post('/api/learning-plans/with-media', formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      let response;
       
-      // Handle successful response
-      console.log('Created plan with media:', response.data);
+      if (isEditMode) {
+        // Update existing learning plan
+        response = await LearningPlanService.updateWithMedia(id, formDataToSend);
+        setFeedback('Learning plan updated successfully!');
+      } else {
+        // Create new learning plan
+        response = await LearningPlanService.createWithMedia(formDataToSend);
+        setFeedback('Learning plan created successfully!');
+      }
       
-      // Navigate to the learning plans list
-      navigate('/learning-plans');
-    } catch (error) {
-      console.error('Error creating learning plan:', error);
-      setError('Failed to create learning plan. Please try again.');
+      // Display success message briefly before redirecting
+      setTimeout(() => {
+        navigate(`/learning-plans/${response.id}`);
+      }, 1500);
+      
+    } catch (err) {
+      setError(err.message || 'An error occurred. Please try again.');
+      console.error('Error submitting learning plan:', err);
     } finally {
       setSubmitting(false);
     }
   };
 
+  // If loading data in edit mode, show spinner
   if (loading) {
     return <LoadingSpinner message="Loading learning plan data..." />;
   }
@@ -242,28 +292,29 @@ const LearningPlanForm = () => {
     return (
       <div className="mb-4">
         <label className="form-label">Attached Media ({totalMediaCount}/3)</label>
-        <div className="d-flex flex-wrap">
+        <div className="d-flex flex-wrap gap-2">
           {/* Show existing media */}
           {existingMedia.map((url, index) => (
-            <div key={`existing-${index}`} className="position-relative me-2 mb-2">
+            <div key={`existing-${index}`} className="position-relative media-preview-item">
               {url.includes('.mp4') || url.includes('.webm') ? (
                 <video 
                   src={url} 
                   style={{ width: '100px', height: '100px', objectFit: 'cover' }} 
-                  className="rounded"
+                  className="rounded border"
                 ></video>
               ) : (
                 <img 
                   src={url} 
                   alt={`Attachment ${index + 1}`} 
                   style={{ width: '100px', height: '100px', objectFit: 'cover' }} 
-                  className="rounded"
+                  className="rounded border"
                 />
               )}
               <button
                 type="button"
-                className="btn btn-sm btn-danger position-absolute top-0 end-0"
+                className="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 rounded-circle"
                 onClick={() => removeExistingMedia(index)}
+                title="Remove file"
               >
                 <i className="bi bi-x"></i>
               </button>
@@ -272,25 +323,26 @@ const LearningPlanForm = () => {
           
           {/* Show new media previews */}
           {previewUrls.map((url, index) => (
-            <div key={`new-${index}`} className="position-relative me-2 mb-2">
+            <div key={`new-${index}`} className="position-relative media-preview-item">
               {url.includes('video') ? (
                 <video 
                   src={url} 
                   style={{ width: '100px', height: '100px', objectFit: 'cover' }} 
-                  className="rounded"
+                  className="rounded border"
                 ></video>
               ) : (
                 <img 
                   src={url} 
                   alt={`New attachment ${index + 1}`} 
                   style={{ width: '100px', height: '100px', objectFit: 'cover' }} 
-                  className="rounded"
+                  className="rounded border"
                 />
               )}
               <button
                 type="button"
-                className="btn btn-sm btn-danger position-absolute top-0 end-0"
+                className="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 rounded-circle"
                 onClick={() => removeMedia(index)}
+                title="Remove file"
               >
                 <i className="bi bi-x"></i>
               </button>
@@ -308,9 +360,16 @@ const LearningPlanForm = () => {
         
         {error && <ErrorAlert message={error} />}
         
-        <form onSubmit={handleSubmit}>
+        {feedback && (
+          <div className="alert alert-success">
+            <i className="bi bi-check-circle-fill me-2"></i>
+            {feedback}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} ref={formRef}>
           <div className="mb-3">
-            <label htmlFor="title" className="form-label">Plan Title</label>
+            <label htmlFor="title" className="form-label">Plan Title <span className="text-danger">*</span></label>
             <input
               type="text"
               className="form-control"
@@ -324,7 +383,7 @@ const LearningPlanForm = () => {
           </div>
           
           <div className="mb-3">
-            <label htmlFor="description" className="form-label">Description</label>
+            <label htmlFor="description" className="form-label">Description <span className="text-danger">*</span></label>
             <textarea
               className="form-control"
               id="description"
@@ -339,7 +398,7 @@ const LearningPlanForm = () => {
           
           <div className="mb-3">
             <label className="form-label d-flex justify-content-between">
-              <span>Topics to Learn</span>
+              <span>Topics to Learn <span className="text-danger">*</span></span>
               <button
                 type="button"
                 className="btn btn-sm btn-outline-primary"
@@ -365,6 +424,7 @@ const LearningPlanForm = () => {
                   className="btn btn-outline-danger"
                   onClick={() => removeArrayItem('topics', index)}
                   disabled={formData.topics.length === 1}
+                  title={formData.topics.length === 1 ? "At least one topic is required" : "Remove topic"}
                 >
                   <i className="bi bi-x"></i>
                 </button>
@@ -395,7 +455,6 @@ const LearningPlanForm = () => {
                   value={resource}
                   onChange={(e) => handleArrayChange(index, 'resources', e.target.value)}
                   placeholder="e.g., MDN Web Docs, Udemy Course"
-                  required={index === 0}
                 />
                 <button
                   type="button"
@@ -410,7 +469,7 @@ const LearningPlanForm = () => {
           </div>
           
           <div className="mb-4">
-            <label htmlFor="timeline" className="form-label">Timeline</label>
+            <label htmlFor="timeline" className="form-label">Timeline <span className="text-danger">*</span></label>
             <input
               type="text"
               className="form-control"

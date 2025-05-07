@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -41,34 +41,34 @@ public class MediaService {
     public List<String> uploadFiles(MultipartFile[] files, String folder, Long entityId) {
         List<String> fileUrls = new ArrayList<>();
         
-        if (files == null || files.length == 0) {
-            return fileUrls;
-        }
-        
         try {
-            // Create directory path
-            Path directoryPath = Paths.get(uploadDir, folder, entityId.toString());
-            Files.createDirectories(directoryPath);
+            // Create entity directory if it doesn't exist
+            Path entityDir = Paths.get(uploadDir, folder, entityId.toString());
+            if (!Files.exists(entityDir)) {
+                Files.createDirectories(entityDir);
+            }
             
             for (MultipartFile file : files) {
                 if (file != null && !file.isEmpty()) {
-                    // Generate a unique filename
-                    String originalFilename = file.getOriginalFilename();
-                    String fileExtension = "";
-                    if (originalFilename != null && originalFilename.contains(".")) {
-                        fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                    try {
+                        // Generate a unique filename
+                        String originalFilename = file.getOriginalFilename();
+                        String extension = originalFilename != null ? 
+                                originalFilename.substring(originalFilename.lastIndexOf(".")) : "";
+                        String newFilename = UUID.randomUUID().toString() + extension;
+                        
+                        // Save the file
+                        Path filePath = entityDir.resolve(newFilename);
+                        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                        
+                        // Generate the URL that can be accessed through your controller
+                        String fileUrl = baseUrl + "/api/media/" + folder + "/" + entityId + "/" + newFilename;
+                        fileUrls.add(fileUrl);
+                        
+                        System.out.println("Saved file: " + filePath + ", URL: " + fileUrl);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    String newFilename = UUID.randomUUID().toString() + fileExtension;
-                    
-                    // Save the file
-                    Path filePath = directoryPath.resolve(newFilename);
-                    Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-                    
-                    // Generate the URL that can be accessed through your controller
-                    String fileUrl = baseUrl + "/api/media/" + folder + "/" + entityId + "/" + newFilename;
-                    fileUrls.add(fileUrl);
-                    
-                    System.out.println("Saved file: " + filePath + ", URL: " + fileUrl);
                 }
             }
         } catch (Exception e) {
@@ -79,38 +79,36 @@ public class MediaService {
     }
     
     public void deleteFile(String fileUrl) {
-        if (fileUrl == null || fileUrl.isEmpty()) {
-            System.out.println("No file URL provided for deletion");
-            return;
-        }
-        
         try {
-            // Extract path from URL
-            if (!fileUrl.startsWith(baseUrl)) {
-                System.err.println("Invalid file URL format: " + fileUrl);
-                return;
+            // Parse the URL to get file path components
+            // URL format: baseUrl + "/api/media/" + folder + "/" + entityId + "/" + filename
+            String baseUrlPrefix = baseUrl + "/api/media/";
+            if (fileUrl.startsWith(baseUrlPrefix)) {
+                String relativePath = fileUrl.substring(baseUrlPrefix.length());
+                String[] pathParts = relativePath.split("/");
+                
+                if (pathParts.length >= 3) {
+                    String folder = pathParts[0];
+                    String entityId = pathParts[1];
+                    String filename = pathParts[2];
+                    
+                    Path filePath = Paths.get(uploadDir, folder, entityId, filename);
+                    if (Files.exists(filePath)) {
+                        Files.delete(filePath);
+                        System.out.println("Deleted file: " + filePath);
+                        
+                        // Check if directory is empty and delete if it is
+                        Path entityDir = Paths.get(uploadDir, folder, entityId);
+                        if (Files.exists(entityDir) && Files.list(entityDir).count() == 0) {
+                            Files.delete(entityDir);
+                            System.out.println("Deleted empty directory: " + entityDir);
+                        }
+                    }
+                }
             }
-            
-            String relativePath = fileUrl.substring(baseUrl.length() + "/api/media/".length());
-            Path filePath = Paths.get(uploadDir, relativePath);
-            
-            System.out.println("Attempting to delete file: " + filePath.toAbsolutePath());
-            
-            // Delete file if it exists
-            if (Files.exists(filePath)) {
-                Files.delete(filePath);
-                System.out.println("Successfully deleted file: " + filePath);
-            } else {
-                System.out.println("File not found for deletion: " + filePath);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Failed to delete file: " + fileUrl + " - " + e.getMessage());
-            // Don't throw exception to allow process to continue
         } catch (Exception e) {
+            System.err.println("Error deleting file: " + e.getMessage());
             e.printStackTrace();
-            System.err.println("Unexpected error when deleting file: " + e.getMessage());
-            // Don't throw exception to allow process to continue
         }
     }
 }
