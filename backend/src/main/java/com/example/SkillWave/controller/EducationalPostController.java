@@ -113,6 +113,7 @@ public class EducationalPostController {
     }
     
     // Update a post
+    //update
     @PutMapping("/{id}")
     public ResponseEntity<EducationalPost> updatePost(@PathVariable Long id, @RequestBody EducationalPost post) {
         try {
