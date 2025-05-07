@@ -210,6 +210,9 @@ public class EducationalPostController {
     }
     
     // Search posts
+
+    // search
+    
     @GetMapping("/search")
     public ResponseEntity<List<EducationalPost>> searchPosts(@RequestParam String keyword) {
         List<EducationalPost> posts = postService.searchPosts(keyword);
