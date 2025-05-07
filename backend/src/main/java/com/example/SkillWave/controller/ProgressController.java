@@ -73,7 +73,7 @@ public class ProgressController {
         
         return ResponseEntity.ok(response);
     }
-    
+    // process mapping
     @GetMapping("/user/{userId}/content/{contentId}/type/{contentType}")
     public ResponseEntity<Progress> getUserContentProgress(
             @PathVariable String userId,
