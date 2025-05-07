@@ -166,6 +166,8 @@ public class EducationalPostController {
     }
     
     // Delete a post
+
+    //delete
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         try {
