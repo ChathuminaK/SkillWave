@@ -31,7 +31,7 @@ public class ProgressController {
             progress.getContentType() == null) {
             throw new IllegalArgumentException("userId, contentId, and contentType are required");
         }
-        
+        //set values 
         // Set default values if they're not provided
         if (progress.getProgressPercentage() == null) {
             progress.setProgressPercentage(0);
