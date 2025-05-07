@@ -23,7 +23,7 @@ public class ProgressController {
     
     @Autowired
     private ProgressService progressService;
-    
+    //post mapping
     @PostMapping
     public ResponseEntity<Progress> createProgress(@RequestBody Progress progress) {
         // Validate required fields
