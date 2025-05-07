@@ -74,6 +74,7 @@ public class EducationalPostController {
     }
     
     // Create a post with media
+    // media
     @PostMapping("/with-media")
     public ResponseEntity<EducationalPost> createPostWithMedia(
             @RequestParam("title") String title,
