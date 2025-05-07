@@ -12,61 +12,28 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(LearningPlanNotFoundException.class)
-    public ResponseEntity<Object> handleLearningPlanNotFoundException(LearningPlanNotFoundException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("message", ex.getMessage());
-        body.put("status", HttpStatus.NOT_FOUND.value());
-        
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Not Found");
+        response.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
     
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<Object> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("message", "File size exceeds the maximum allowed limit");
-        body.put("status", HttpStatus.PAYLOAD_TOO_LARGE.value());
-        
-        return new ResponseEntity<>(body, HttpStatus.PAYLOAD_TOO_LARGE);
-    }
-    
-    @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<Object> handleNullPointerException(NullPointerException ex) {
-        ex.printStackTrace();
-        
-        Map<String, Object> body = new HashMap<>();
-        body.put("message", "A null value was encountered. Please check your form data.");
-        body.put("error", ex.getMessage());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Map<String, String>> handleMaxSizeException(MaxUploadSizeExceededException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "File Size Exceeded");
+        response.put("message", "The uploaded file exceeds the maximum allowed size");
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(response);
     }
     
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleGenericException(Exception ex) {
+    public ResponseEntity<Map<String, String>> handleGlobalException(Exception ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", "Internal Server Error");
+        response.put("message", ex.getMessage());
         ex.printStackTrace();
-        
-        Map<String, Object> body = new HashMap<>();
-        body.put("message", "An unexpected error occurred: " + ex.getMessage());
-        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        
-        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-    
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
-        Map<String, Object> body = new HashMap<>();
-        
-        // Check if it's a "not found" exception
-        if (ex.getMessage() != null && ex.getMessage().contains("not found")) {
-            body.put("message", ex.getMessage());
-            body.put("status", HttpStatus.NOT_FOUND.value());
-            return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
-        }
-        
-        // General runtime exception
-        body.put("message", "An error occurred: " + ex.getMessage());
-        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

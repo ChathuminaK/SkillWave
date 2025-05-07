@@ -1,0 +1,149 @@
+/* Post Stats Styles */
+.post-stats {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.post-stats .btn-action {
+  border: none;
+  background: transparent;
+  color: #6c757d;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s;
+}
+
+.post-stats .btn-action:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.post-stats .btn-action.text-primary {
+  color: #0d6efd !important;
+}
+
+.post-stats .btn-action.text-warning {
+  color: #ffc107 !important;
+}
+
+/* Comment Section Styles */
+.comments-section {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.comment-item {
+  position: relative;
+}
+
+.comment-item .comment-avatar img,
+.comment-item .comment-avatar div {
+  width: 40px;
+  height: 40px;
+}
+
+.comment-content {
+  position: relative;
+}
+
+.replies-container {
+  padding-left: 1rem;
+  border-left: 2px solid #e9ecef;
+}
+
+.replies-container .comment-item {
+  border-bottom: none !important;
+  padding-bottom: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.comment-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.comment-form textarea:focus {
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Topic Tags */
+.badge.topic-badge {
+  background-color: #f8f9fa;
+  color: #212529;
+  font-weight: 500;
+  padding: 5px 10px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  border-radius: 16px;
+  border: 1px solid #dee2e6;
+}
+
+.badge.topic-badge:hover {
+  background-color: #e9ecef;
+  cursor: pointer;
+}
+
+/* Educational Post Content */
+.post-content {
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.post-content h2 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.post-content h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.post-content p {
+  margin-bottom: 1.25rem;
+}
+
+.post-content blockquote {
+  padding: 1rem;
+  border-left: 4px solid #0d6efd;
+  background-color: #f8f9fa;
+  margin: 1.5rem 0;
+}
+
+.post-content pre {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.post-content code {
+  background-color: #f8f9fa;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 1.5rem 0;
+}
+
+.post-content ul, .post-content ol {
+  margin-bottom: 1.25rem;
+  padding-left: 1.5rem;
+}
+
+.post-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* Author info */
+.author-info {
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+}

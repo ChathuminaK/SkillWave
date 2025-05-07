@@ -1,8 +1,11 @@
 package com.example.SkillWave.controller;
 
 import com.example.SkillWave.model.LearningPlan;
+import com.example.SkillWave.model.Progress;
 import com.example.SkillWave.service.LearningPlanService;
 import com.example.SkillWave.service.MediaService;
+import com.example.SkillWave.service.ProgressService;
+import com.example.SkillWave.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +14,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/learning-plans")
@@ -23,6 +29,9 @@ public class LearningPlanController {
     
     @Autowired
     private MediaService mediaService;
+    
+    @Autowired
+    private ProgressService progressService;
     
     @Autowired
     private ObjectMapper objectMapper;
@@ -39,8 +48,9 @@ public class LearningPlanController {
     }
 
     @PostMapping
-    public LearningPlan createLearningPlan(@RequestBody LearningPlan learningPlan) {
-        return learningPlanService.createLearningPlan(learningPlan);
+    public ResponseEntity<LearningPlan> createLearningPlan(@RequestBody LearningPlan learningPlan) {
+        learningPlan.setTimeline(learningPlan.getTimeline());
+        return ResponseEntity.ok(learningPlanService.createLearningPlan(learningPlan));
     }
     
     @PostMapping("/with-media")
@@ -90,6 +100,7 @@ public class LearningPlanController {
     @PutMapping("/{id}")
     public ResponseEntity<LearningPlan> updateLearningPlan(@PathVariable Long id, @RequestBody LearningPlan learningPlan) {
         LearningPlan updatedPlan = learningPlanService.updateLearningPlan(id, learningPlan);
+        updatedPlan.setTimeline(learningPlan.getTimeline() != null ? learningPlan.getTimeline() : "");
         return ResponseEntity.ok(updatedPlan);
     }
     
@@ -241,34 +252,64 @@ public class LearningPlanController {
         }
     }
     
+    @GetMapping("/{id}/progress/{userId}")
+    public ResponseEntity<?> getLearningPlanProgressForUser(
+            @PathVariable Long id, 
+            @PathVariable String userId) {
+        
+        // First check if the learning plan exists
+        LearningPlan plan = learningPlanService.getLearningPlanById(id);
+        if (plan == null) {
+            throw new ResourceNotFoundException("Learning plan not found with id: " + id);
+        }
+        
+        // Then get or initialize the progress
+        Optional<Progress> progressOptional = progressService.getProgressByUserAndContent(userId, id, "LEARNING_PLAN");
+        Progress progress = progressOptional.orElse(new Progress());
+        
+        // If no progress exists yet, initialize basic information
+        if (progress.getId() == null) {
+            progress.setUserId(userId);
+            progress.setContentId(id);
+            progress.setContentType("LEARNING_PLAN");
+            progress.setProgressPercentage(0);
+            progress.setCompleted(false);
+        }
+        
+        // Return a response combining plan and progress data
+        Map<String, Object> response = new HashMap<>();
+        response.put("plan", plan);
+        response.put("progress", progress);
+        
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}/progress/{userId}/{percentage}")
+    public ResponseEntity<Progress> updateLearningPlanProgress(
+            @PathVariable Long id,
+            @PathVariable String userId,
+            @PathVariable Integer percentage) {
+        
+        // First check if the learning plan exists
+        LearningPlan plan = learningPlanService.getLearningPlanById(id);
+        if (plan == null) {
+            throw new ResourceNotFoundException("Learning plan not found with id: " + id);
+        }
+        
+        // Update the progress
+        Progress updatedProgress = progressService.updateProgressPercentage(userId, id, "LEARNING_PLAN", percentage);
+        
+        return ResponseEntity.ok(updatedProgress);
+    }
+    
     // Helper method to parse JSON arrays
     private List<String> parseJsonArray(String json) {
         try {
-            // Handle null or empty input
             if (json == null || json.trim().isEmpty()) {
                 return new ArrayList<>();
             }
-            
-            json = json.trim();
-            System.out.println("Parsing JSON array: " + json);
-            
-            // Try to parse as proper JSON array first
-            if (json.startsWith("[") && json.endsWith("]")) {
-                try {
-                    return Arrays.asList(objectMapper.readValue(json, String[].class));
-                } catch (Exception e) {
-                    System.err.println("Error parsing as JSON array, falling back to simple parsing: " + e.getMessage());
-                }
-            }
-            
-            // Fallback to simple comma-separated parsing
-            return Arrays.stream(json.replace("[", "").replace("]", "").replace("\"", "").split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .toList();
-                
+            return objectMapper.readValue(json, List.class);
         } catch (Exception e) {
-            System.err.println("Error parsing JSON array: " + e.getMessage());
             e.printStackTrace();
             return new ArrayList<>();
         }

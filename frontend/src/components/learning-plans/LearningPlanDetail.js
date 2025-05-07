@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { LearningPlanService } from '../../services/learningPlan.service';
+import ProgressTracker from '../progress/ProgressTracker';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorAlert from '../common/ErrorAlert';
 
@@ -157,6 +158,9 @@ const LearningPlanDetail = () => {
             </button>
           </div>
         </div>
+        
+        {/* Add Progress Tracker */}
+        <ProgressTracker contentId={parseInt(id)} contentType="LEARNING_PLAN" />
         
         {/* Render media content if available */}
         {renderMediaContent()}
