@@ -360,6 +360,7 @@ public class EducationalPostController {
         }
         
         // Return a response combining post and progress data
+        // combined 
         Map<String, Object> response = new HashMap<>();
         response.put("post", post);
         response.put("progress", progress);
