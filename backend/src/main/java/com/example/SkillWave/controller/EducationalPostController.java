@@ -191,6 +191,8 @@ public class EducationalPostController {
     }
     
     // Get posts by category with pagination
+
+    //get post
     @GetMapping("/by-category/{category}")
     public ResponseEntity<Map<String, Object>> getPostsByCategory(
             @PathVariable String category,
@@ -212,7 +214,7 @@ public class EducationalPostController {
     // Search posts
 
     // search
-    
+
     @GetMapping("/search")
     public ResponseEntity<List<EducationalPost>> searchPosts(@RequestParam String keyword) {
         List<EducationalPost> posts = postService.searchPosts(keyword);
