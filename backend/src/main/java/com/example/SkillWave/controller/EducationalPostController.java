@@ -177,6 +177,7 @@ public class EducationalPostController {
     }
     
     // Get posts by user ID
+    // get post
     @GetMapping("/by-user/{userId}")
     public ResponseEntity<List<EducationalPost>> getPostsByUser(@PathVariable String userId) {
         List<EducationalPost> posts = postService.getPostsByUser(userId);
