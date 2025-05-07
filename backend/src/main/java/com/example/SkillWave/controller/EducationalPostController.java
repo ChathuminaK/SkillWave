@@ -56,6 +56,7 @@ public class EducationalPostController {
     }
     
     // Get post by ID
+    //get
     @GetMapping("/{id}")
     public ResponseEntity<EducationalPost> getPostById(@PathVariable Long id) {
         try {
@@ -74,6 +75,7 @@ public class EducationalPostController {
     }
     
     // Create a post with media
+    // media
     @PostMapping("/with-media")
     public ResponseEntity<EducationalPost> createPostWithMedia(
             @RequestParam("title") String title,
@@ -113,6 +115,7 @@ public class EducationalPostController {
     }
     
     // Update a post
+    //update
     @PutMapping("/{id}")
     public ResponseEntity<EducationalPost> updatePost(@PathVariable Long id, @RequestBody EducationalPost post) {
         try {
@@ -166,6 +169,8 @@ public class EducationalPostController {
     }
     
     // Delete a post
+
+    //delete
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         try {
@@ -177,6 +182,7 @@ public class EducationalPostController {
     }
     
     // Get posts by user ID
+    // get post
     @GetMapping("/by-user/{userId}")
     public ResponseEntity<List<EducationalPost>> getPostsByUser(@PathVariable String userId) {
         List<EducationalPost> posts = postService.getPostsByUser(userId);
@@ -317,6 +323,7 @@ public class EducationalPostController {
     }
     
     // Get category counts
+    //get count
     @GetMapping("/analytics/category-counts")
     public ResponseEntity<Map<String, Long>> getCategoryCounts() {
         Map<String, Long> categoryCounts = postService.getCategoryCounts();
@@ -353,6 +360,7 @@ public class EducationalPostController {
         }
         
         // Return a response combining post and progress data
+        // combined 
         Map<String, Object> response = new HashMap<>();
         response.put("post", post);
         response.put("progress", progress);
@@ -370,8 +378,10 @@ public class EducationalPostController {
         EducationalPost post = postService.getPostById(id);
         
         // Update the progress
+        // update 
         Progress updatedProgress = progressService.updateProgressPercentage(userId, id, "EDUCATIONAL_POST", percentage);
         
         return ResponseEntity.ok(updatedProgress);
     }
+    // delete
 }
