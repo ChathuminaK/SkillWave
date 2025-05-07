@@ -323,6 +323,7 @@ public class EducationalPostController {
     }
     
     // Get category counts
+    //get count
     @GetMapping("/analytics/category-counts")
     public ResponseEntity<Map<String, Long>> getCategoryCounts() {
         Map<String, Long> categoryCounts = postService.getCategoryCounts();
