@@ -378,6 +378,7 @@ public class EducationalPostController {
         EducationalPost post = postService.getPostById(id);
         
         // Update the progress
+        // update 
         Progress updatedProgress = progressService.updateProgressPercentage(userId, id, "EDUCATIONAL_POST", percentage);
         
         return ResponseEntity.ok(updatedProgress);
