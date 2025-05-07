@@ -98,7 +98,8 @@ public class PostCommentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
+    //Delete a comment. Allowed for either comment owner or post owner.
+     
     // Delete a comment
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteComment(
@@ -122,6 +123,7 @@ public class PostCommentController {
     }
     
     // Get comments by user ID
+    //Get all comments made by a specific user.
     @GetMapping("/by-user/{userId}")
     public ResponseEntity<List<PostComment>> getCommentsByUserId(@PathVariable String userId) {
         List<PostComment> comments = commentService.getCommentsByUserId(userId);
@@ -129,6 +131,7 @@ public class PostCommentController {
     }
     
     // Count comments for a post
+    //Count the total number of comments on a specific post.
     @GetMapping("/count/post/{postId}")
     public ResponseEntity<Map<String, Long>> countCommentsByPostId(@PathVariable Long postId) {
         long count = commentService.countCommentsByPostId(postId);
