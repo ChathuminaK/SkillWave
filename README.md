@@ -11,6 +11,7 @@ SkillWave is a comprehensive skill-sharing and learning platform designed to con
 - [Functional Overview](#functional-overview)
 - [Contributors](#contributors)
 - [License](#license)
+- [References](#references)
 
 ---
 
@@ -142,4 +143,23 @@ This project is for educational purposes as part of the Programming Applications
 
 ## References
 
-*Add references and external resources here as needed.*
+- [Spring Boot Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/)
+- [React Documentation](https://reactjs.org/docs/getting-started.html)
+- [JWT Authentication](https://jwt.io/introduction/)
+- [OAuth 2.0 Specification](https://oauth.net/2/)
+- [React Router Documentation](https://reactrouter.com/)
+- [Spring Security Documentation](https://docs.spring.io/spring-security/reference/)
+- [MySQL Documentation](https://dev.mysql.com/doc/)
+- [H2 Database Documentation](https://www.h2database.com/html/main.html)
+- [Spring Data JPA Documentation](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
+- [Material UI Documentation](https://mui.com/getting-started/usage/)
+- [React Context API](https://reactjs.org/docs/context.html)
+- [Axios HTTP Client](https://axios-http.com/docs/intro)
+- [JSON Web Token (JWT) Best Practices](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-jwt-bcp)
+- [Web Content Accessibility Guidelines (WCAG)](https://www.w3.org/WAI/standards-guidelines/wcag/)
+- [RESTful API Design](https://restfulapi.net/)
+- [Testing Library Documentation](https://testing-library.com/docs/)
+- [Jest Testing Framework](https://jestjs.io/docs/getting-started)
+- [Spring Boot Testing Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.testing)
+- [React Hooks Documentation](https://reactjs.org/docs/hooks-intro.html)
+- [Cross-Origin Resource Sharing (CORS)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
