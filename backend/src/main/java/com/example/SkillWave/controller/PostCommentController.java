@@ -68,6 +68,7 @@ public class PostCommentController {
     }
     
     // Create a new comment
+    //Get a specific comment by its ID.
     @PostMapping
     public ResponseEntity<PostComment> createComment(@RequestBody PostComment comment) {
         try {
@@ -79,6 +80,7 @@ public class PostCommentController {
     }
     
     // Update a comment
+    //Update an existing comment. Only the owner of the comment can update it.
     @PutMapping("/{id}")
     public ResponseEntity<PostComment> updateComment(
             @PathVariable Long id, 
