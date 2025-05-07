@@ -56,6 +56,7 @@ public class EducationalPostController {
     }
     
     // Get post by ID
+    //get
     @GetMapping("/{id}")
     public ResponseEntity<EducationalPost> getPostById(@PathVariable Long id) {
         try {
