@@ -19,10 +19,10 @@ public class LearningPlan {
     @Column(nullable = false, length = 2000)
     private String description;
     
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> topics = new ArrayList<>();
     
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> resources = new ArrayList<>();
     
     @Column(nullable = false)
@@ -33,7 +33,7 @@ public class LearningPlan {
     @Column(length = 1000)
     private String timeline;
     
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> mediaUrls = new ArrayList<>();
     
     private LocalDateTime targetCompletionDate;

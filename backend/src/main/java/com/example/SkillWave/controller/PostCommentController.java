@@ -66,37 +66,44 @@ public class PostCommentController {
     
     // Create a new comment
     @PostMapping
-    public ResponseEntity<PostComment> createComment(@RequestBody PostComment comment) {
+    public ResponseEntity<?> createComment(@RequestBody PostComment comment) {
         try {
+            // Validate required fields
+            if (comment.getPostId() == null || comment.getUserId() == null || comment.getContent() == null || comment.getContent().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Missing required fields: postId, userId, content");
+            }
             PostComment createdComment = commentService.createComment(comment);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdComment);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create comment: " + e.getMessage());
         }
     }
     
     // Update a comment
     @PutMapping("/{id}")
-    public ResponseEntity<PostComment> updateComment(
+    public ResponseEntity<?> updateComment(
             @PathVariable Long id, 
             @RequestBody PostComment comment,
             @RequestParam String userId) {
         try {
+            // Validate content
+            if (comment.getContent() == null || comment.getContent().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Content cannot be empty");
+            }
             // Verify the user is the owner of the comment
             if (!commentService.isCommentOwner(id, userId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to edit this comment");
             }
-            
             PostComment updatedComment = commentService.updateComment(id, comment);
             return ResponseEntity.ok(updatedComment);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update comment: " + e.getMessage());
         }
     }
     
     // Delete a comment
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteComment(
+    public ResponseEntity<?> deleteComment(
             @PathVariable Long id,
             @RequestParam String userId,
             @RequestParam(required = false) String postOwnerId) {
@@ -104,15 +111,13 @@ public class PostCommentController {
             // Check if the user is either the comment owner or the post owner
             boolean isCommentOwner = commentService.isCommentOwner(id, userId);
             boolean isPostOwner = (postOwnerId != null && postOwnerId.equals(userId));
-            
             if (!isCommentOwner && !isPostOwner) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to delete this comment");
             }
-            
             commentService.deleteComment(id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete comment: " + e.getMessage());
         }
     }
     

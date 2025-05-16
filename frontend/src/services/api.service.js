@@ -1,124 +1,158 @@
 import axios from 'axios';
+import { TokenUtil } from './token.util';
 
-// Determine API base URL based on environment
-const getBaseUrl = () => {
-  if (process.env.NODE_ENV === 'production') {
-    return 'https://api.skillwave.yourdomain.com'; // Change to your production API domain
-  }
-  return 'http://localhost:8080'; // Local development API
-};
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
-// Create a base API instance
+// Create axios instance with default configs
 const api = axios.create({
-  baseURL: getBaseUrl(),
+  baseURL: API_URL,
+  timeout: 30000, // Increased timeout for larger requests
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   },
-  timeout: 15000, // 15 seconds timeout
+  withCredentials: true // Enable cookies for all requests
 });
 
-// Add or update request interceptor
+// Request interceptor
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('auth_token');
+  async (config) => {
+    // Log request details in development environment
+    if (process.env.NODE_ENV === 'development') {
+      console.log('API Request:', config.method?.toUpperCase(), config.url);
+    }
+    
+    // Add token to request if it exists
+    const token = TokenUtil.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('Adding token to request:', config.url);
     }
+    
     return config;
   },
   (error) => {
+    console.error('Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
 
-// Add response interceptor for error handling
+// Response interceptor
 api.interceptors.response.use(
-  response => response,
-  error => {
-    // Log the error details
-    console.error('API Error:', error.response || error);
+  (response) => {
+    // Log response in development environment
+    if (process.env.NODE_ENV === 'development') {
+      console.log('API Response:', response.status, response.config.url);
+    }
+    return response;
+  },
+  async (error) => {
+    // Log error in development environment
+    if (process.env.NODE_ENV === 'development') {
+      console.error('API Error:', 
+        error.response?.status, 
+        error.config?.url, 
+        error.response?.data
+      );
+    }
     
-    // Handle specific error cases
-    if (error.response) {
-      switch (error.response.status) {
-        case 401:
-          // Handle unauthorized - redirect to login
-          localStorage.removeItem('auth_token');
-          // Redirect to login if outside of login page
-          if (!window.location.pathname.includes('/login')) {
-            window.location.href = '/login';
-          }
-          break;
+    const originalRequest = error.config;
+    
+    // Handle 401 Unauthorized errors - token expired or invalid
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        // Import AuthService dynamically to avoid circular dependencies
+        const { AuthService } = await import('./auth.service');
+        const refreshed = await AuthService.refreshToken();
         
-        case 404:
-          console.error('Resource not found:', error.config.url);
-          break;
-          
-        case 500:
-          console.error('Server error:', error.response.data);
-          break;
-          
-        default:
-          console.error(`API error (${error.response.status}):`, error.response.data);
+        if (refreshed) {
+          // Update request with new token and retry
+          const token = TokenUtil.getToken();
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        }
+        
+        // If refresh failed, logout the user
+        AuthService.logout();
+        // Prevent infinite redirect loop
+        if (!window.location.pathname.startsWith('/login')) {
+          window.location.href = '/login?session=expired';
+        }
+        return Promise.reject(error);
+      } catch (refreshError) {
+        console.error("Error refreshing token:", refreshError);
+        // Clear tokens on refresh error
+        const { AuthService } = await import('./auth.service');
+        AuthService.logout();
+        if (!window.location.pathname.startsWith('/login')) {
+          window.location.href = '/login?session=expired';
+        }
+        return Promise.reject(error);
       }
-    } else if (error.request) {
-      // Network error (no response received)
-      console.error('Network error - no response received:', error.request);
+    }
+    
+    // Handle 404 Not Found
+    if (error.response?.status === 404) {
+      console.error('Resource not found:', error.config?.url);
+    }
+    
+    // Handle 500 server errors
+    if (error.response?.status >= 500) {
+      console.error('Server error:', error.response?.data);
     }
     
     return Promise.reject(error);
   }
 );
 
-// API instance with debugging wrapper for development
-const apiWithDebug = process.env.NODE_ENV !== 'production' 
-  ? {
-      get: async (...args) => {
-        console.log(`🔍 GET:`, args[0]);
-        try {
-          const response = await api.get(...args);
-          console.log(`✓ Response for GET ${args[0]}:`, response.data);
-          return response;
-        } catch (error) {
-          console.error(`✗ Error for GET ${args[0]}:`, error);
-          throw error;
-        }
-      },
-      post: async (...args) => {
-        console.log(`🔍 POST:`, args[0], args[1]);
-        try {
-          const response = await api.post(...args);
-          console.log(`✓ Response for POST ${args[0]}:`, response.data);
-          return response;
-        } catch (error) {
-          console.error(`✗ Error for POST ${args[0]}:`, error);
-          throw error;
-        }
-      },
-      put: async (...args) => {
-        console.log(`🔍 PUT:`, args[0], args[1]);
-        try {
-          const response = await api.put(...args);
-          console.log(`✓ Response for PUT ${args[0]}:`, response.data);
-          return response;
-        } catch (error) {
-          console.error(`✗ Error for PUT ${args[0]}:`, error);
-          throw error;
-        }
-      },
-      delete: async (...args) => {
-        console.log(`🔍 DELETE:`, args[0]);
-        try {
-          const response = await api.delete(...args);
-          console.log(`✓ Response for DELETE ${args[0]}:`, response.data);
-          return response;
-        } catch (error) {
-          console.error(`✗ Error for DELETE ${args[0]}:`, error);
-          throw error;
-        }
-      }
-    }
-  : api;
+// Export API instance
+export default api;
 
-export default apiWithDebug;
+// Export helper functions for common API patterns
+export const apiHelpers = {
+  // Fetch data with pagination
+  fetchPaginated: async (endpoint, page = 0, size = 10, params = {}) => {
+    try {
+      const response = await api.get(endpoint, {
+        params: { page, size, ...params }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching paginated data from ${endpoint}:`, error);
+      throw error;
+    }
+  },
+  
+  // Create resource
+  create: async (endpoint, data) => {
+    try {
+      const response = await api.post(endpoint, data);
+      return response.data;
+    } catch (error) {
+      console.error(`Error creating resource at ${endpoint}:`, error);
+      throw error;
+    }
+  },
+  
+  // Update resource
+  update: async (endpoint, id, data) => {
+    try {
+      const response = await api.put(`${endpoint}/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating resource at ${endpoint}/${id}:`, error);
+      throw error;
+    }
+  },
+  
+  // Delete resource
+  remove: async (endpoint, id) => {
+    try {
+      const response = await api.delete(`${endpoint}/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting resource at ${endpoint}/${id}:`, error);
+      throw error;
+    }
+  }
+};

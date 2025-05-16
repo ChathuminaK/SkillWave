@@ -1,4 +1,5 @@
 import api from './api.service';
+import { extractErrorMessage } from '../utils/extractErrorMessage';
 
 export const LearningPlanService = {
   // Get all learning plans with pagination and filtering
@@ -7,10 +8,11 @@ export const LearningPlanService = {
       const response = await api.get('/api/learning-plans', {
         params: { page, size, sortBy, direction }
       });
-      return response.data;
+      // Return the array of plans, not the paginated object
+      return response.data.content || response.data || [];
     } catch (error) {
       console.error('Error fetching learning plans:', error);
-      throw error;
+      throw new Error(extractErrorMessage(error));
     }
   },
   
@@ -23,7 +25,7 @@ export const LearningPlanService = {
       return response.data;
     } catch (error) {
       console.error('Error fetching featured learning plans:', error);
-      throw error;
+      throw new Error(extractErrorMessage(error));
     }
   },
   
@@ -34,7 +36,7 @@ export const LearningPlanService = {
       return response.data;
     } catch (error) {
       console.error(`Error fetching learning plan with ID ${id}:`, error);
-      throw new Error('Failed to load the learning plan. It might have been deleted or does not exist.');
+      throw new Error(extractErrorMessage(error));
     }
   },
   
@@ -47,7 +49,7 @@ export const LearningPlanService = {
       return response.data;
     } catch (error) {
       console.error(`Error fetching learning plans for topic ${topic}:`, error);
-      throw error;
+      throw new Error(extractErrorMessage(error));
     }
   },
   
@@ -57,8 +59,7 @@ export const LearningPlanService = {
       const response = await api.post('/api/learning-plans', learningPlan);
       return response.data;
     } catch (error) {
-      console.error('Error creating learning plan:', error);
-      throw new Error('Failed to create learning plan. Please try again.');
+      throw new Error(extractErrorMessage(error));
     }
   },
   
@@ -85,8 +86,8 @@ export const LearningPlanService = {
       
       return response.data;
     } catch (error) {
-      console.error('Error creating learning plan with media:', error);
-      throw new Error(error.response?.data?.message || 'Failed to create learning plan. Please try again.');
+      const msg = error.response?.data?.message || error.response?.data || 'Failed to create learning plan. Please try again.';
+      throw new Error(msg);
     }
   },
   
@@ -96,8 +97,7 @@ export const LearningPlanService = {
       const response = await api.put(`/api/learning-plans/${id}`, learningPlan);
       return response.data;
     } catch (error) {
-      console.error(`Error updating learning plan with ID ${id}:`, error);
-      throw new Error('Failed to update learning plan. Please try again.');
+      throw new Error(extractErrorMessage(error));
     }
   },
   
@@ -118,8 +118,8 @@ export const LearningPlanService = {
       
       return response.data;
     } catch (error) {
-      console.error(`Error updating learning plan with ID ${id}:`, error);
-      throw new Error(error.response?.data?.message || 'Failed to update learning plan. Please try again.');
+      const msg = error.response?.data?.message || error.response?.data || 'Failed to update learning plan. Please try again.';
+      throw new Error(msg);
     }
   },
   
@@ -129,8 +129,8 @@ export const LearningPlanService = {
       await api.delete(`/api/learning-plans/${id}`);
       return true;
     } catch (error) {
-      console.error(`Error deleting learning plan with ID ${id}:`, error);
-      throw new Error('Failed to delete learning plan. Please try again.');
+      const msg = error.response?.data?.message || error.response?.data || 'Failed to delete learning plan. Please try again.';
+      throw new Error(msg);
     }
   },
   
@@ -152,7 +152,7 @@ export const LearningPlanService = {
       return response.data;
     } catch (error) {
       console.error(`Error updating progress for learning plan ${id}:`, error);
-      throw new Error('Failed to update progress. Please try again.');
+      throw new Error(extractErrorMessage(error));
     }
   },
   
@@ -163,7 +163,7 @@ export const LearningPlanService = {
       return response.data;
     } catch (error) {
       console.error('Error fetching learning plans analytics:', error);
-      throw error;
+      throw new Error(extractErrorMessage(error));
     }
   }
 };

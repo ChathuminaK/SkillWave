@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { ProgressService } from '../services/progress.service';
+import { useAuth } from './AuthContext';
 
 const ProgressContext = createContext();
 
 export const useProgress = () => useContext(ProgressContext);
 
 export const ProgressProvider = ({ children }) => {
-  // In a real app, this would come from authentication
-  // Hard-coding for demo purposes
-  const [userId] = useState('user123');
+  const { currentUser } = useAuth();
+  const userId = currentUser?.id;
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [progressItems, setProgressItems] = useState([]);
@@ -19,7 +20,7 @@ export const ProgressProvider = ({ children }) => {
   const fetchProgressSummary = useCallback(async () => {
     try {
       setLoading(true);
-      const summary = await ProgressService.getProgressSummary(userId);
+      const summary = await ProgressService.getProgressSummary(currentUser?.id);
       setProgressSummary(summary);
       setError(null);
     } catch (err) {
@@ -28,13 +29,13 @@ export const ProgressProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [currentUser?.id]);
   
   // Fetch user progress
   const fetchUserProgress = useCallback(async (page = 0, size = 10) => {
     try {
       setLoading(true);
-      const data = await ProgressService.getUserProgress(userId, page, size);
+      const data = await ProgressService.getUserProgress(currentUser?.id, page, size);
       setProgressItems(data.progress || []);
       setError(null);
       return data;
@@ -45,13 +46,13 @@ export const ProgressProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [currentUser?.id]);
   
   // Fetch completed progress items
   const fetchCompletedProgress = useCallback(async (page = 0, size = 10) => {
     try {
       setLoading(true);
-      const data = await ProgressService.getCompletedProgress(userId, page, size);
+      const data = await ProgressService.getCompletedProgress(currentUser?.id, page, size);
       setCompletedItems(data.progress || []);
       setError(null);
       return data;
@@ -62,14 +63,14 @@ export const ProgressProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [currentUser?.id]);
   
   // Create new progress
   const createProgress = useCallback(async (contentId, contentType) => {
     try {
       setLoading(true);
       const newProgress = await ProgressService.createProgress({
-        userId,
+        userId: currentUser?.id,
         contentId,
         contentType,
         progressPercentage: 0,
@@ -86,14 +87,14 @@ export const ProgressProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [currentUser?.id]);
   
   // Update progress percentage
   const updateProgressPercentage = useCallback(async (contentId, contentType, percentage) => {
     try {
       setLoading(true);
       const updatedProgress = await ProgressService.updateProgressPercentage(
-        userId, contentId, contentType, percentage
+        currentUser?.id, contentId, contentType, percentage
       );
       
       // Update the local state
@@ -110,14 +111,14 @@ export const ProgressProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [currentUser?.id]);
   
   // Mark content as completed
   const markAsCompleted = useCallback(async (contentId, contentType) => {
     try {
       setLoading(true);
       const updatedProgress = await ProgressService.markAsCompleted(
-        userId, contentId, contentType
+        currentUser?.id, contentId, contentType
       );
       
       // Update both progress lists
@@ -137,14 +138,14 @@ export const ProgressProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [userId, fetchProgressSummary]);
+  }, [currentUser?.id, fetchProgressSummary]);
   
   // Reset progress
   const resetProgress = useCallback(async (contentId, contentType) => {
     try {
       setLoading(true);
       const resetItem = await ProgressService.resetProgress(
-        userId, contentId, contentType
+        currentUser?.id, contentId, contentType
       );
       
       // Update the local state
@@ -164,7 +165,7 @@ export const ProgressProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [userId, fetchProgressSummary]);
+  }, [currentUser?.id, fetchProgressSummary]);
   
   // Load initial data
   useEffect(() => {
@@ -172,7 +173,7 @@ export const ProgressProvider = ({ children }) => {
   }, [fetchProgressSummary]);
   
   const contextValue = {
-    userId,
+    userId: currentUser?.id,
     loading,
     error,
     progressItems,

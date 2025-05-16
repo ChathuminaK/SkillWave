@@ -1,17 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Header = () => {
   const location = useLocation();
   const { currentUser, logout, isAuthenticated } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
   
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div className="container-fluid">
-        <Link className="navbar-brand" to="/">
-          <strong>Skill</strong>Wave
+    <header className="navbar navbar-expand-lg navbar-light bg-white border-bottom py-0 sticky-top">
+      <div className="container">
+        <Link className="navbar-brand py-0 me-2" to="/">
+          <div className="d-flex align-items-center">
+            <div className="bg-primary rounded p-1 me-1">
+              <span className="text-white fw-bold h5 mb-0">S</span>
+            </div>
+            <div className="d-none d-sm-block">
+              <span className="fw-bold text-primary">Skill</span><span className="fw-bold">Wave</span>
+            </div>
+          </div>
         </Link>
+        
+        <div className="ms-2 me-auto d-none d-md-block" style={{ width: '280px' }}>
+          <div className="position-relative">
+            <span className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted">
+              <i className="bi bi-search"></i>
+            </span>
+            <input 
+              type="text" 
+              className="form-control bg-light py-2 ps-5" 
+              placeholder="Search skills, topics, plans..." 
+              value={searchQuery} 
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+        
         <button
           className="navbar-toggler"
           type="button"
@@ -20,42 +44,45 @@ const Header = () => {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
+        
         <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav me-auto">
-            <li className="nav-item">
+          <ul className="navbar-nav mx-auto">
+            <li className="nav-item mx-1">
               <Link 
-                className={`nav-link ${location.pathname === '/' ? 'active fw-bold' : ''}`}
+                className={`nav-link d-flex flex-column align-items-center px-3 py-2 ${location.pathname === '/' ? 'active' : ''}`}
                 to="/"
               >
-                Dashboard
+                <i className="bi bi-house-door fs-5"></i>
+                <span className="small">Home</span>
               </Link>
             </li>
-            <li className="nav-item">
+            <li className="nav-item mx-1">
               <Link 
-                className={`nav-link ${location.pathname === '/learning-plans' ? 'active fw-bold' : ''}`}
+                className={`nav-link d-flex flex-column align-items-center px-3 py-2 ${location.pathname.includes('/learning-plans') && !location.pathname.includes('/create') ? 'active' : ''}`}
                 to="/learning-plans"
               >
-                Learning Plans
+                <i className="bi bi-journal-text fs-5"></i>
+                <span className="small">My Network</span>
               </Link>
             </li>
-            <li className="nav-item">
+            <li className="nav-item mx-1">
               <Link 
-                className={`nav-link ${location.pathname === '/learning-plans/create' ? 'active fw-bold' : ''}`}
+                className={`nav-link d-flex flex-column align-items-center px-3 py-2 ${location.pathname.includes('/learning-plans/create') ? 'active' : ''}`}
                 to="/learning-plans/create"
               >
-                Create Plan
+                <i className="bi bi-plus-circle fs-5"></i>
+                <span className="small">Create</span>
               </Link>
             </li>
-            <li className="nav-item">
+            <li className="nav-item mx-1">
               <Link 
-                className={`nav-link ${location.pathname === '/progress' ? 'active fw-bold' : ''}`}
+                className={`nav-link d-flex flex-column align-items-center px-3 py-2 ${location.pathname === '/progress' ? 'active' : ''}`}
                 to="/progress"
               >
-                <i className="bi bi-graph-up me-1"></i>
-                Progress Report
+                <i className="bi bi-graph-up fs-5"></i>
+                <span className="small">Progress</span>
               </Link>
-            </li>
-          </ul>
+            </li>          </ul>
           <div className="d-flex">
             {isAuthenticated ? (
               <div className="dropdown">
@@ -110,9 +137,8 @@ const Header = () => {
               </div>
             )}
           </div>
-        </div>
-      </div>
-    </nav>
+        </div>      </div>
+    </header>
   );
 };
 

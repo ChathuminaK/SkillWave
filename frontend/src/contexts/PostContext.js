@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
 import { PostService } from '../services/post.service';
+import { useAuth } from './AuthContext';
 
 // Create the context
 const PostContext = createContext();
@@ -20,16 +21,15 @@ export const PostProvider = ({ children }) => {
   const [hasMore, setHasMore] = useState(true);
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortDirection, setSortDirection] = useState('desc');
-  
-  // Mock user ID - in a real app, this would come from authentication
-  const userId = 'user123';
-  
+
+  const { currentUser } = useAuth();
+
   // Fetch posts with current filters
   const fetchPosts = useCallback(async (page = 0, replace = true) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await PostService.getPosts(
         page,
         10,
@@ -37,13 +37,13 @@ export const PostProvider = ({ children }) => {
         sortBy,
         sortDirection
       );
-      
+
       setPosts(prev => replace ? response.posts : [...prev, ...response.posts]);
       setTotalPages(response.totalPages);
       setTotalElements(response.totalItems);
       setCurrentPage(response.currentPage);
       setHasMore(page < response.totalPages - 1);
-      
+
     } catch (err) {
       setError('Failed to load posts. Please try again.');
       console.error(err);
@@ -51,7 +51,7 @@ export const PostProvider = ({ children }) => {
       setLoading(false);
     }
   }, [selectedCategory, sortBy, sortDirection]);
-  
+
   // Fetch categories
   const fetchCategories = useCallback(async () => {
     try {
@@ -66,36 +66,36 @@ export const PostProvider = ({ children }) => {
       ]);
     }
   }, []);
-  
+
   // Initialize data
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
-  
+
   useEffect(() => {
     fetchPosts(0, true);
   }, [fetchPosts, selectedCategory, sortBy, sortDirection]);
-  
+
   // Change category
   const changeCategory = (category) => {
     setSelectedCategory(category);
     setCurrentPage(0);
   };
-  
+
   // Change sorting
   const changeSorting = (newSortBy, newDirection = 'desc') => {
     setSortBy(newSortBy);
     setSortDirection(newDirection);
     setCurrentPage(0);
   };
-  
+
   // Load more posts
   const loadMorePosts = () => {
     if (!loading && hasMore) {
       fetchPosts(currentPage + 1, false);
     }
   };
-  
+
   // Delete a post
   const deletePost = async (id) => {
     try {
@@ -109,43 +109,43 @@ export const PostProvider = ({ children }) => {
       return false;
     }
   };
-  
+
   // Like a post
   const likePost = async (id) => {
     try {
-      const updatedPost = await PostService.likePost(id, userId);
-      
+      const updatedPost = await PostService.likePost(id, currentUser?.id);
+
       setPosts(posts.map(post => 
         post.id === id 
           ? { ...post, likesCount: updatedPost.likesCount, likedBy: updatedPost.likedBy } 
           : post
       ));
-      
+
       return true;
     } catch (err) {
       console.error(err);
       return false;
     }
   };
-  
+
   // Unlike a post
   const unlikePost = async (id) => {
     try {
-      const updatedPost = await PostService.unlikePost(id, userId);
-      
+      const updatedPost = await PostService.unlikePost(id, currentUser?.id);
+
       setPosts(posts.map(post => 
         post.id === id 
           ? { ...post, likesCount: updatedPost.likesCount, likedBy: updatedPost.likedBy } 
           : post
       ));
-      
+
       return true;
     } catch (err) {
       console.error(err);
       return false;
     }
   };
-  
+
   // Get a single post by ID
   const getPostById = async (id) => {
     try {
@@ -161,7 +161,7 @@ export const PostProvider = ({ children }) => {
       setLoading(false);
     }
   };
-  
+
   // Context value
   const contextValue = {
     posts,
@@ -184,9 +184,9 @@ export const PostProvider = ({ children }) => {
     likePost,
     unlikePost,
     getPostById,
-    userId // For demo purposes
+    userId: currentUser?.id // For demo purposes
   };
-  
+
   return (
     <PostContext.Provider value={contextValue}>
       {children}

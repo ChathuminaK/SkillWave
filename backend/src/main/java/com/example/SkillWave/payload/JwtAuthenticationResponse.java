@@ -10,9 +10,15 @@ public class JwtAuthenticationResponse {
     private String name;
     private String email;
     private String provider;
+    private String refreshToken;
 
     public JwtAuthenticationResponse(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public JwtAuthenticationResponse(String accessToken, String refreshToken) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 
     public JwtAuthenticationResponse(String accessToken, Long userId, String name, String email) {
@@ -68,5 +74,13 @@ public class JwtAuthenticationResponse {
 
     public void setProvider(String provider) {
         this.provider = provider;
+    }
+    
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+    
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

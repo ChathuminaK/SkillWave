@@ -1,40 +1,104 @@
 import api from './api.service';
+import { TokenUtil } from './token.util';
+import { extractErrorMessage } from '../utils/extractErrorMessage';
 
-export const AuthService = {
-  // Regular email/password login
+// eslint-disable-next-line
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
+export const AuthService = {  
   login: async (email, password) => {
     try {
       const response = await api.post('/api/auth/login', { email, password });
-      
-      // Make sure we're storing the token correctly
-      if (response.data && response.data.accessToken) {
-        localStorage.setItem('auth_token', response.data.accessToken);
-        console.log('Token stored successfully');
-      } else {
-        console.error('Token not found in response', response.data);
+      if (response.data.accessToken) {
+        TokenUtil.saveToken(response.data.accessToken);
+        
+        // Save refresh token
+        if (response.data.refreshToken) {
+          TokenUtil.saveRefreshToken(response.data.refreshToken);
+        }
+        
+        localStorage.setItem('userId', response.data.userId);
+        return response.data;
       }
-      
-      // Get current user info
-      return await AuthService.getCurrentUser();
+      return null;
     } catch (error) {
       console.error('Login error:', error);
-      throw error;
+      throw new Error(extractErrorMessage(error));
     }
   },
-
-  // User registration
+  
   register: async (userData) => {
     try {
       const response = await api.post('/api/auth/register', userData);
+      if (response.data.accessToken) {
+        TokenUtil.saveToken(response.data.accessToken);
+        
+        // Save refresh token
+        if (response.data.refreshToken) {
+          TokenUtil.saveRefreshToken(response.data.refreshToken);
+        }
+        
+        localStorage.setItem('userId', response.data.userId);
+        return response.data;
+      }
       return response.data;
     } catch (error) {
       console.error('Registration error:', error);
-      throw error;
+      throw new Error(extractErrorMessage(error));
     }
   },
-
-  // Get current authenticated user info
+  
+  logout: async () => {
+    try {
+      // Call backend logout endpoint
+      await api.post('/api/auth/logout');
+      
+      // Clean up tokens and storage
+      TokenUtil.removeTokens();
+      localStorage.removeItem('userId');
+      
+      return true;
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still remove tokens even if the API call fails
+      TokenUtil.removeTokens();
+      localStorage.removeItem('userId');
+      
+      throw new Error(extractErrorMessage(error));
+    }
+  },
+  
+  refreshToken: async () => {
+    try {
+      const refreshToken = TokenUtil.getRefreshToken();
+      if (!refreshToken) {
+        return false;
+      }
+      
+      const response = await api.post('/api/auth/refresh-token', { refreshToken });
+      
+      if (response.data.accessToken) {
+        TokenUtil.saveToken(response.data.accessToken);
+        if (response.data.refreshToken) {
+          TokenUtil.saveRefreshToken(response.data.refreshToken);
+        }
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      return false;
+    }
+  },
+  
+  isTokenExpiring: () => {
+    return TokenUtil.isTokenExpiring();
+  },
+  
   getCurrentUser: async () => {
+    const token = TokenUtil.getToken();
+    if (!token) return null;
     try {
       const response = await api.get('/api/auth/current-user');
       return response.data;
@@ -44,84 +108,13 @@ export const AuthService = {
     }
   },
 
-  // Logout - invalidate token on server
-  logout: async () => {
-    try {
-      await api.post('/api/auth/logout');
-      return true;
-    } catch (error) {
-      console.error('Logout error:', error);
-      throw error;
-    }
-  },
-
-  // Update user profile
-  updateProfile: async (userData) => {
-    try {
-      const response = await api.put('/api/auth/profile', userData);
-      return response.data;
-    } catch (error) {
-      console.error('Profile update error:', error);
-      throw error;
-    }
-  },
-
-  // Change password
-  changePassword: async (currentPassword, newPassword) => {
-    try {
-      const response = await api.put('/api/auth/change-password', {
-        currentPassword,
-        newPassword
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Password change error:', error);
-      throw error;
-    }
-  },
-
-  // Get OAuth login URL
-  getOAuthLoginUrl: (provider) => {
-    if (provider === 'google') {
-      return `${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/auth/oauth2/google/login`;
-    } else if (provider === 'github') {
-      return `${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/auth/oauth2/github/login`;
-    }
-    return null;
-  },
-
-  // Get OAuth registration URL
   getOAuthRegistrationUrl: (provider) => {
-    if (provider === 'google') {
-      return `${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/auth/oauth2/google/register`;
-    } else if (provider === 'github') {
-      return `${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/auth/oauth2/github/register`;
-    }
-    return null;
+    return `${API_URL}/oauth2/authorize/${provider}?redirect_uri=${encodeURIComponent(window.location.origin)}/oauth2/redirect`;
   },
-
-  // Request password reset
-  forgotPassword: async (email) => {
-    try {
-      const response = await api.post('/api/auth/forgot-password', { email });
-      return response.data;
-    } catch (error) {
-      console.error('Password reset request error:', error);
-      throw error;
-    }
-  },
-
-  // Reset password with token
-  resetPassword: async (token, newPassword) => {
-    try {
-      const response = await api.post('/api/auth/reset-password', {
-        token,
-        newPassword
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Password reset error:', error);
-      throw error;
-    }
+  
+  getOAuthLoginUrl: (provider) => {
+    return `${API_URL}/oauth2/authorize/${provider}?redirect_uri=${encodeURIComponent(window.location.origin)}/oauth2/redirect`;
   }
 };
+
+export default AuthService;

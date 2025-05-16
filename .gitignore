@@ -1,3 +1,5 @@
 /frontend/node_modules
 frontend/package-lock.json
 /backend/uploads
+backend/target/classes/application.properties
+backend/src/main/resources/application.properties

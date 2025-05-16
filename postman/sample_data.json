@@ -1,0 +1,101 @@
+{
+  "auth": {
+    "register": {
+      "name": "New Test User",
+      "email": "newuser@example.com",
+      "password": "securePassword123"
+    },
+    "login": {
+      "email": "test.user@example.com",
+      "password": "securePassword123"
+    },
+    "refreshToken": {
+      "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0LnVzZXJAZXhhbXBsZS5jb20iLCJpYXQiOjE2ODQxMjM0NTYsImV4cCI6MTY4NDcyODI1Nn0.exampleRefreshTokenSignature"
+    }
+  },
+  "courses": {
+    "create": {
+      "title": "Introduction to Python Programming",
+      "description": "Learn the basics of Python programming language",
+      "duration": 8,
+      "level": "BEGINNER",
+      "price": 49.99,
+      "categoryId": 1,
+      "instructorId": 1
+    },
+    "update": {
+      "title": "Advanced Python Programming",
+      "description": "Master advanced Python concepts and techniques",
+      "duration": 12,
+      "level": "ADVANCED",
+      "price": 79.99,
+      "categoryId": 1,
+      "instructorId": 1
+    }
+  },
+  "userProfile": {
+    "update": {
+      "name": "Updated User Name",
+      "bio": "This is my updated profile bio with more information about myself."
+    }
+  },
+  "enrollments": {
+    "create": {
+      "courseId": 1,
+      "userId": 1,
+      "enrollmentDate": "2025-05-14T10:00:00"
+    }
+  },
+  "reviews": {
+    "create": {
+      "courseId": 1,
+      "rating": 4.5,
+      "comment": "This course was very helpful and informative!"
+    }
+  },
+  "responses": {
+    "login": {
+      "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0LnVzZXJAZXhhbXBsZS5jb20iLCJpYXQiOjE2ODQxMjM0NTYsImV4cCI6MTY4NDIwOTg1Nn0.exampleAccessTokenSignature",
+      "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0LnVzZXJAZXhhbXBsZS5jb20iLCJpYXQiOjE2ODQxMjM0NTYsImV4cCI6MTY4NDcyODI1Nn0.exampleRefreshTokenSignature",
+      "userId": 1,
+      "name": "Test User",
+      "email": "test.user@example.com",
+      "provider": "local"
+    },
+    "currentUser": {
+      "id": 1,
+      "name": "Test User",
+      "email": "test.user@example.com",
+      "profilePictureUrl": null,
+      "roles": ["ROLE_USER"],
+      "provider": "local"
+    },
+    "invalidSession": {
+      "timestamp": "2025-05-14T18:24:08.726+00:00",
+      "status": 401,
+      "error": "Unauthorized",
+      "path": "/api/users/me",
+      "message": "Invalid or expired session"
+    }
+  },
+  "errors": {
+    "invalidCredentials": {
+      "timestamp": "2025-05-14T18:30:15.123+00:00",
+      "status": 401,
+      "error": "Unauthorized",
+      "message": "Bad credentials"
+    },
+    "invalidToken": {
+      "timestamp": "2025-05-14T18:45:30.927+00:00",
+      "status": 401,
+      "error": "Unauthorized",
+      "message": "Invalid JWT token"
+    },
+    "sessionExpired": {
+      "timestamp": "2025-05-14T23:24:08.726+00:00",
+      "status": 401,
+      "error": "Unauthorized",
+      "message": "Session has expired"
+    }
+  }
+}

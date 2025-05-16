@@ -3,8 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { LearningPlanService } from '../../services/learningPlan.service';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorAlert from '../common/ErrorAlert';
+import { useAuth } from '../../contexts/AuthContext';
 
 const LearningPlanForm = () => {
+  const { currentUser } = useAuth();
+  // Ensure userId and userName are always present and not null
+  const userId = currentUser?.id || currentUser?.userId || '';
+  const userName = currentUser?.name || currentUser?.userName || '';
+
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = !!id;
@@ -201,16 +207,27 @@ const LearningPlanForm = () => {
   // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+    setFeedback(null);
     
-    if (!formRef.current.checkValidity()) {
-      formRef.current.reportValidity();
+    // Debug: log user info
+    console.log('currentUser:', currentUser);
+    console.log('userId:', userId, 'userName:', userName);
+    
+    // Prevent submission if not authenticated or missing user info
+    if (!currentUser || !userId || !userName) {
+      setError('You must be logged in to create or update a learning plan. (User info missing)');
+      return;
+    }
+    
+    // Validate required fields
+    if (!formData.title.trim() || !formData.description.trim()) {
+      setError('Title and description are required.');
       return;
     }
     
     try {
       setSubmitting(true);
-      setError(null);
-      setFeedback(null);
       
       // In edit mode, verify the plan still exists
       if (isEditMode) {
@@ -238,6 +255,9 @@ const LearningPlanForm = () => {
       formDataToSend.append('topics', JSON.stringify(filteredTopics));
       formDataToSend.append('resources', JSON.stringify(filteredResources));
       formDataToSend.append('timeline', formData.timeline.trim());
+      // Only send snake_case user fields for backend compatibility
+      formDataToSend.append('user_id', String(userId));
+      formDataToSend.append('user_name', userName);
       
       // Add existing media URLs for edit mode
       if (isEditMode && existingMedia.length > 0) {
@@ -250,6 +270,9 @@ const LearningPlanForm = () => {
           formDataToSend.append('media', file);
         });
       }
+      
+      // Debug: log FormData entries
+      console.log('FormData to send:', Array.from(formDataToSend.entries()));
       
       let response;
       

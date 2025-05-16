@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { PostService } from '../services/post.service';
 import { CommentService } from '../services/comment.service';
+import { useAuth } from '../contexts/AuthContext';
 import PageHeader from '../components/common/PageHeader';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorAlert from '../components/common/ErrorAlert';
@@ -10,6 +11,9 @@ import ProgressTracker from '../components/progress/ProgressTracker';
 const EducationalPostPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const userId = currentUser?.id;
+  const userName = currentUser?.name;
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,10 +25,7 @@ const EducationalPostPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [progress, setProgress] = useState(0);
   const [liked, setLiked] = useState(false);
-  
-  // Hardcoded user ID for demo
-  const userId = 'user123';
-  
+
   // Fetch post data
   useEffect(() => {
     const fetchPostData = async () => {
@@ -32,15 +33,17 @@ const EducationalPostPage = () => {
         setLoading(true);
         const postData = await PostService.getPostById(id);
         setPost(postData);
-        
+
         // Check if user has liked the post
-        try {
-          const hasLiked = await PostService.hasUserLiked(id, userId);
-          setLiked(hasLiked);
-        } catch (likeError) {
-          console.error('Error checking if post is liked:', likeError);
+        if (userId) {
+          try {
+            const hasLiked = await PostService.hasUserLiked(id, userId);
+            setLiked(hasLiked);
+          } catch (likeError) {
+            console.error('Error checking if post is liked:', likeError);
+          }
         }
-        
+
         // Fetch related posts
         try {
           const relatedPostsData = await PostService.getRelatedPosts(id);
@@ -48,7 +51,7 @@ const EducationalPostPage = () => {
         } catch (relatedError) {
           console.error('Error fetching related posts:', relatedError);
         }
-        
+
         setError(null);
       } catch (err) {
         setError('Failed to load post. It might have been deleted or does not exist.');
@@ -57,15 +60,15 @@ const EducationalPostPage = () => {
         setLoading(false);
       }
     };
-    
+
     fetchPostData();
-  }, [id]);
-  
+  }, [id, userId]);
+
   // Fetch comments
   useEffect(() => {
     const fetchComments = async () => {
       if (!id) return;
-      
+
       try {
         setCommentLoading(true);
         const response = await CommentService.getCommentsByPostId(id);
@@ -78,48 +81,61 @@ const EducationalPostPage = () => {
         setCommentLoading(false);
       }
     };
-    
+
     fetchComments();
   }, [id]);
-  
+
   // Handle comment submission
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!commentText.trim()) return;
-    
+    setCommentError(null);
+    if (!currentUser) {
+      setCommentError('You must be logged in to post a comment.');
+      return;
+    }
+    if (!commentText.trim()) {
+      setCommentError('Comment cannot be empty.');
+      return;
+    }
     try {
       const newComment = {
         postId: id,
         userId: userId,
-        userName: 'John Doe', // Hardcoded for demo
+        userName: userName,
         content: commentText,
       };
-      
       const savedComment = await CommentService.createComment(newComment);
       setComments([savedComment, ...comments]);
       setCommentText('');
     } catch (err) {
-      setCommentError('Failed to post comment. Please try again.');
+      setCommentError(err.message || 'Failed to post comment. Please try again.');
       console.error(err);
     }
   };
-  
+
   // Handle post delete
   const handleDelete = async () => {
+    if (!currentUser) {
+      setError('You must be logged in to delete a post.');
+      return;
+    }
     try {
       await PostService.deletePost(id);
       navigate('/posts');
     } catch (error) {
-      setError('Failed to delete post.');
+      setError(error.message || 'Failed to delete post.');
       console.error('Failed to delete post:', error);
     } finally {
       setShowDeleteModal(false);
     }
   };
-  
+
   // Handle post like/unlike
   const handleLikeToggle = async () => {
+    if (!currentUser) {
+      alert('You must be logged in to like a post.');
+      return;
+    }
     try {
       if (liked) {
         await PostService.unlikePost(id, userId);
@@ -139,9 +155,13 @@ const EducationalPostPage = () => {
       console.error('Error toggling like:', error);
     }
   };
-  
+
   // Handle progress update
   const handleProgressUpdate = async (newProgress) => {
+    if (!currentUser) {
+      alert('You must be logged in to update progress.');
+      return;
+    }
     try {
       await PostService.updateProgress(id, userId, newProgress);
       setProgress(newProgress);
@@ -149,7 +169,7 @@ const EducationalPostPage = () => {
       console.error('Error updating progress:', error);
     }
   };
-  
+
   // Format date
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -160,11 +180,11 @@ const EducationalPostPage = () => {
       day: 'numeric'
     });
   };
-  
+
   if (loading) {
     return <LoadingSpinner message="Loading post..." />;
   }
-  
+
   if (error || !post) {
     return (
       <div className="container py-4">
@@ -177,7 +197,7 @@ const EducationalPostPage = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="container py-4">
       {/* Post header */}
@@ -185,9 +205,9 @@ const EducationalPostPage = () => {
         <Link to="/posts" className="btn btn-sm btn-outline-secondary mb-3">
           <i className="bi bi-arrow-left me-1"></i> Back to Posts
         </Link>
-        
+
         <h1 className="mb-3">{post.title}</h1>
-        
+
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div className="d-flex align-items-center">
             <div className="me-3">
@@ -204,7 +224,7 @@ const EducationalPostPage = () => {
               </p>
             </div>
           </div>
-          
+
           <div className="d-flex gap-2">
             <span className="badge bg-primary">{post.category}</span>
             <span className="badge bg-secondary">{post.difficultyLevel}</span>
@@ -215,7 +235,7 @@ const EducationalPostPage = () => {
             )}
           </div>
         </div>
-        
+
         {/* Media gallery */}
         {post.mediaUrls && post.mediaUrls.length > 0 && (
           <div className="mb-4">
@@ -224,7 +244,7 @@ const EducationalPostPage = () => {
                 // Determine if it's an image or video based on extension
                 const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
                 const isVideo = /\.(mp4|webm|ogg)$/i.test(url);
-                
+
                 return (
                   <div key={index} className="col-md-4 mb-3">
                     <div className="card h-100">
@@ -257,7 +277,7 @@ const EducationalPostPage = () => {
             </div>
           </div>
         )}
-        
+
         {/* Post owner actions */}
         {post.userId === userId && (
           <div className="d-flex gap-2 mt-3 mb-4">
@@ -273,7 +293,7 @@ const EducationalPostPage = () => {
           </div>
         )}
       </div>
-      
+
       {/* Progress tracker */}
       {post.id && (
         <ProgressTracker 
@@ -281,7 +301,7 @@ const EducationalPostPage = () => {
           contentType="EDUCATIONAL_POST" 
         />
       )}
-      
+
       {/* Post content */}
       <div className="card shadow-sm mb-4">
         <div className="card-body">
@@ -291,7 +311,7 @@ const EducationalPostPage = () => {
               {post.content}
             </div>
           </div>
-          
+
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
             <div className="mt-4">
@@ -305,7 +325,7 @@ const EducationalPostPage = () => {
               </div>
             </div>
           )}
-          
+
           {/* Social interactions */}
           <div className="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
             <div className="d-flex align-items-center">
@@ -317,12 +337,12 @@ const EducationalPostPage = () => {
                 {liked ? 'Liked' : 'Like'}
                 {post.likesCount > 0 && ` (${post.likesCount})`}
               </button>
-              
+
               <button className="btn btn-sm btn-outline-secondary me-2">
                 <i className="bi bi-chat-text me-1"></i>
                 Comments ({comments.length})
               </button>
-              
+
               <button 
                 className="btn btn-sm btn-outline-secondary"
                 onClick={() => {
@@ -337,13 +357,13 @@ const EducationalPostPage = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Comments section */}
       <div className="card shadow-sm mb-4">
         <div className="card-header bg-white">
           <h5 className="mb-0">Comments</h5>
         </div>
-        
+
         <div className="card-body">
           {/* Comment form */}
           <form onSubmit={handleCommentSubmit} className="mb-4">
@@ -363,9 +383,9 @@ const EducationalPostPage = () => {
               </button>
             </div>
           </form>
-          
+
           {commentError && <ErrorAlert message={commentError} />}
-          
+
           {/* Comment list */}
           {commentLoading ? (
             <LoadingSpinner message="Loading comments..." />
@@ -391,7 +411,7 @@ const EducationalPostPage = () => {
                         </p>
                       </div>
                     </div>
-                    
+
                     {(comment.userId === userId || post.userId === userId) && (
                       <div className="dropdown">
                         <button className="btn btn-sm btn-link text-secondary" type="button" data-bs-toggle="dropdown">
@@ -410,6 +430,10 @@ const EducationalPostPage = () => {
                               className="dropdown-item text-danger" 
                               type="button"
                               onClick={async () => {
+                                if (!currentUser) {
+                                  alert('You must be logged in to delete a comment.');
+                                  return;
+                                }
                                 if (window.confirm('Are you sure you want to delete this comment?')) {
                                   try {
                                     await CommentService.deleteComment(
@@ -431,7 +455,7 @@ const EducationalPostPage = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   <p className="mb-0">{comment.content}</p>
                 </div>
               ))}
@@ -439,14 +463,14 @@ const EducationalPostPage = () => {
           )}
         </div>
       </div>
-      
+
       {/* Related posts */}
       {relatedPosts.length > 0 && (
         <div className="card shadow-sm mb-4">
           <div className="card-header bg-white">
             <h5 className="mb-0">Related Posts</h5>
           </div>
-          
+
           <div className="card-body">
             <div className="row">
               {relatedPosts.map(relatedPost => (
@@ -476,7 +500,7 @@ const EducationalPostPage = () => {
           </div>
         </div>
       )}
-      
+
       {/* Delete confirmation modal */}
       {showDeleteModal && (
         <div className="modal d-block" tabIndex="-1" role="dialog" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>

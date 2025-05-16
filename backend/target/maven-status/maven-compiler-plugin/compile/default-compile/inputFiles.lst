@@ -2,7 +2,9 @@ C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\Skill
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\config\DatabaseConfig.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\config\SecurityConfig.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\config\WebConfig.java
+C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\config\WebMvcConfig.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\controller\AuthController.java
+C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\controller\DatabaseRepairController.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\controller\EducationalPostController.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\controller\LearningPlanController.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\controller\MediaController.java
@@ -25,6 +27,7 @@ C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\Skill
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\payload\AuthResponse.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\payload\JwtAuthenticationResponse.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\payload\LoginRequest.java
+C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\payload\RefreshTokenRequest.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\payload\SignUpRequest.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\repository\EducationalPostRepository.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\repository\LearningPlanRepository.java
@@ -54,5 +57,6 @@ C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\Skill
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\service\MediaService.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\service\PostCommentService.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\service\ProgressService.java
+C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\service\UserDetailsServiceImpl.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\SkillWaveApplication.java
 C:\Users\MCS\Desktop\SkillWave\SkillWave\backend\src\main\java\com\example\SkillWave\util\CookieUtils.java

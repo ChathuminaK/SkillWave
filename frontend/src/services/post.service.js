@@ -1,4 +1,5 @@
 import api from './api.service';
+import { extractErrorMessage } from '../utils/extractErrorMessage';
 
 export const PostService = {
   // Get all posts with pagination and filters
@@ -11,7 +12,7 @@ export const PostService = {
       return response.data;
     } catch (error) {
       console.error('Error fetching posts:', error);
-      throw error;
+      throw new Error(extractErrorMessage(error));
     }
   },
 
@@ -22,7 +23,7 @@ export const PostService = {
       return response.data;
     } catch (error) {
       console.error(`Error fetching post with ID ${id}:`, error);
-      throw error;
+      throw new Error(extractErrorMessage(error));
     }
   },
 
@@ -36,8 +37,8 @@ export const PostService = {
       });
       return response.data;
     } catch (error) {
-      console.error('Error creating post with media:', error);
-      throw error;
+      const msg = error.response?.data?.message || error.response?.data || 'Failed to create post. Please try again.';
+      throw new Error(msg);
     }
   },
 
@@ -47,8 +48,8 @@ export const PostService = {
       const response = await api.post('/api/educational-posts', postData);
       return response.data;
     } catch (error) {
-      console.error('Error creating post:', error);
-      throw error;
+      const msg = error.response?.data?.message || error.response?.data || 'Failed to create post. Please try again.';
+      throw new Error(msg);
     }
   },
 
@@ -62,8 +63,8 @@ export const PostService = {
       });
       return response.data;
     } catch (error) {
-      console.error(`Error updating post with ID ${id}:`, error);
-      throw error;
+      const msg = error.response?.data?.message || error.response?.data || 'Failed to update post. Please try again.';
+      throw new Error(msg);
     }
   },
 
@@ -73,8 +74,8 @@ export const PostService = {
       const response = await api.put(`/api/educational-posts/${id}`, postData);
       return response.data;
     } catch (error) {
-      console.error(`Error updating post with ID ${id}:`, error);
-      throw error;
+      const msg = error.response?.data?.message || error.response?.data || 'Failed to update post. Please try again.';
+      throw new Error(msg);
     }
   },
 
@@ -84,8 +85,8 @@ export const PostService = {
       await api.delete(`/api/educational-posts/${id}`);
       return true;
     } catch (error) {
-      console.error(`Error deleting post with ID ${id}:`, error);
-      throw error;
+      const msg = error.response?.data?.message || error.response?.data || 'Failed to delete post. Please try again.';
+      throw new Error(msg);
     }
   },
 

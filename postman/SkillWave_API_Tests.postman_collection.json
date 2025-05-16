@@ -1,0 +1,409 @@
+{
+	"info": {
+		"_postman_id": "8a5e4b6c-9d2f-4e3f-b5a0-7f8d3e5a9e7c",
+		"name": "SkillWave API Tests",
+		"description": "API tests for the SkillWave application",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"description": "Authentication-related requests",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();",
+									"if (response.accessToken) {",
+									"    pm.environment.set('authToken', response.accessToken);",
+									"    pm.environment.set('refreshToken', response.refreshToken);",
+									"    pm.environment.set('userId', response.userId);",
+									"    console.log('Token saved to environment variables');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login to get authentication token"
+					},
+					"response": []
+				},
+				{
+					"name": "Check Current User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check if the response indicates a valid session",
+									"pm.test(\"Status code is 200 (valid session)\", function() {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Check if user data is present",
+									"pm.test(\"Response contains user data\", function() {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData).to.be.an('object');",
+									"    pm.expect(responseData.id).to.exist;",
+									"    pm.expect(responseData.email).to.exist;",
+									"});",
+									"",
+									"// Save session information",
+									"const requestHeaders = pm.request.headers.all();",
+									"const cookies = pm.cookies.get();",
+									"console.log('Headers:', requestHeaders);",
+									"console.log('Cookies:', cookies);",
+									"",
+									"// Check for JSESSIONID",
+									"const sessionId = pm.cookies.get('JSESSIONID');",
+									"if (sessionId) {",
+									"    pm.environment.set('sessionId', sessionId);",
+									"    console.log('Session ID saved:', sessionId);",
+									"} else {",
+									"    console.log('No session cookie found');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/current-user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"current-user"
+							]
+						},
+						"description": "Check if the current session is valid by retrieving user details"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();",
+									"if (response.accessToken) {",
+									"    pm.environment.set('authToken', response.accessToken);",
+									"    if (response.refreshToken) {",
+									"        pm.environment.set('refreshToken', response.refreshToken);",
+									"    }",
+									"    console.log('Token refreshed and saved to environment variables');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/refresh-token",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh-token"
+							]
+						},
+						"description": "Refresh the authentication token using the refresh token"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Resources",
+			"item": [
+				{
+					"name": "Get Resource",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/resources/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"resources",
+								"1"
+							]
+						},
+						"description": "Get resource by ID"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Session Tests",
+			"description": "Specific tests for session management",
+			"item": [
+				{
+					"name": "Check Session Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test if session is valid",
+									"pm.test(\"Session check completed\", function() {",
+									"    // Get session details from response",
+									"    const response = pm.response;",
+									"    ",
+									"    // Log full response for debugging",
+									"    console.log('Response status:', response.status);",
+									"    console.log('Response headers:', response.headers.toJSON());",
+									"    ",
+									"    // Check for session cookies",
+									"    const cookies = pm.cookies.getAll();",
+									"    console.log('Cookies:', cookies);",
+									"    ",
+									"    // Check for JSESSIONID specifically",
+									"    const sessionId = pm.cookies.get('JSESSIONID');",
+									"    if (sessionId) {",
+									"        console.log('Active session found:', sessionId);",
+									"        pm.environment.set('sessionId', sessionId);",
+									"    } else {",
+									"        console.log('No session cookie found');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/test/ping",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"ping"
+							]
+						},
+						"description": "Simple endpoint to check session status"
+					},
+					"response": []
+				},
+				{
+					"name": "Access Protected Resource",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Check if we can access protected resources",
+									"pm.test(\"Can access protected resource\", function() {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Check for session information in response",
+									"pm.test(\"Response contains expected data\", function() {",
+									"    try {",
+									"        const responseData = pm.response.json();",
+									"        pm.expect(responseData).to.be.an('object');",
+									"    } catch (e) {",
+									"        console.log('Not JSON response or empty response');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "JSESSIONID={{sessionId}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/learning-plans",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"learning-plans"
+							]
+						},
+						"description": "Attempt to access a protected resource with both token and session cookie"
+					},
+					"response": []
+				},
+				{
+					"name": "Simulate Invalid Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// This should fail with 401 or similar",
+									"pm.test(\"Should reject invalid session\", function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([401, 403, 400]);",
+									"});",
+									"",
+									"console.log('Response:', pm.response.text());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer invalid_token_here",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "JSESSIONID=2DD7BA946346BF3C9663C7B632BDBA36",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/learning-plans",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"learning-plans"
+							]
+						},
+						"description": "Deliberately use an invalid session ID to test error handling"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}

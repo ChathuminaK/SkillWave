@@ -75,7 +75,7 @@ public class EducationalPostController {
     
     // Create a post with media
     @PostMapping("/with-media")
-    public ResponseEntity<EducationalPost> createPostWithMedia(
+    public ResponseEntity<?> createPostWithMedia(
             @RequestParam("title") String title,
             @RequestParam("content") String content,
             @RequestParam(value = "tags", required = false) String tagsJson,
@@ -83,9 +83,10 @@ public class EducationalPostController {
             @RequestParam(value = "difficultyLevel", required = false) String difficultyLevel,
             @RequestParam(value = "estimatedTime", required = false) String estimatedTime,
             @RequestParam(value = "userId", required = false) String userId,
+            @RequestParam(value = "user_id", required = false) String user_id,
             @RequestParam(value = "userName", required = false) String userName,
+            @RequestParam(value = "user_name", required = false) String user_name,
             @RequestParam(value = "media", required = false) MultipartFile[] mediaFiles) {
-        
         try {
             // Create post object
             EducationalPost post = new EducationalPost();
@@ -94,38 +95,41 @@ public class EducationalPostController {
             post.setCategory(category);
             post.setDifficultyLevel(difficultyLevel);
             post.setEstimatedTime(estimatedTime);
-            post.setUserId(userId);
-            post.setUserName(userName);
-            
+            // Set user info from either camelCase or snake_case
+            post.setUserId(userId != null ? userId : user_id);
+            post.setUserName(userName != null ? userName : user_name);
             // Parse tags if provided
             if (tagsJson != null && !tagsJson.isEmpty()) {
                 List<String> tags = objectMapper.readValue(tagsJson, List.class);
                 post.setTags(tags);
             }
-            
             // Create post with media
             EducationalPost createdPost = postService.createPostWithMedia(post, mediaFiles);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdPost);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage() != null ? e.getMessage() : "Failed to create post");
+            return ResponseEntity.status(500).body(error);
         }
     }
     
     // Update a post
     @PutMapping("/{id}")
-    public ResponseEntity<EducationalPost> updatePost(@PathVariable Long id, @RequestBody EducationalPost post) {
+    public ResponseEntity<?> updatePost(@PathVariable Long id, @RequestBody EducationalPost post) {
         try {
             EducationalPost updatedPost = postService.updatePost(id, post);
             return ResponseEntity.ok(updatedPost);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage() != null ? e.getMessage() : "Failed to update post");
+            return ResponseEntity.status(500).body(error);
         }
     }
     
     // Update a post with media
     @PutMapping("/{id}/with-media")
-    public ResponseEntity<EducationalPost> updatePostWithMedia(
+    public ResponseEntity<?> updatePostWithMedia(
             @PathVariable Long id,
             @RequestParam("title") String title,
             @RequestParam("content") String content,
@@ -133,9 +137,12 @@ public class EducationalPostController {
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "difficultyLevel", required = false) String difficultyLevel,
             @RequestParam(value = "estimatedTime", required = false) String estimatedTime,
+            @RequestParam(value = "userId", required = false) String userId,
+            @RequestParam(value = "user_id", required = false) String user_id,
+            @RequestParam(value = "userName", required = false) String userName,
+            @RequestParam(value = "user_name", required = false) String user_name,
             @RequestParam(value = "existingMedia", required = false) String existingMediaJson,
             @RequestParam(value = "media", required = false) MultipartFile[] mediaFiles) {
-        
         try {
             // Create post object with updated values
             EducationalPost post = new EducationalPost();
@@ -144,35 +151,39 @@ public class EducationalPostController {
             post.setCategory(category);
             post.setDifficultyLevel(difficultyLevel);
             post.setEstimatedTime(estimatedTime);
-            
+            // Set user info from either camelCase or snake_case
+            post.setUserId(userId != null ? userId : user_id);
+            post.setUserName(userName != null ? userName : user_name);
             // Parse JSON values
             if (tagsJson != null && !tagsJson.isEmpty()) {
                 List<String> tags = objectMapper.readValue(tagsJson, List.class);
                 post.setTags(tags);
             }
-            
             if (existingMediaJson != null && !existingMediaJson.isEmpty()) {
                 List<String> existingMedia = objectMapper.readValue(existingMediaJson, List.class);
                 post.setMediaUrls(existingMedia);
             }
-            
             // Update post with media
             EducationalPost updatedPost = postService.updatePostWithMedia(id, post, mediaFiles);
             return ResponseEntity.ok(updatedPost);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage() != null ? e.getMessage() : "Failed to update post");
+            return ResponseEntity.status(500).body(error);
         }
     }
     
     // Delete a post
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
+    public ResponseEntity<?> deletePost(@PathVariable Long id) {
         try {
             postService.deletePost(id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage() != null ? e.getMessage() : "Failed to delete post");
+            return ResponseEntity.status(500).body(error);
         }
     }
     

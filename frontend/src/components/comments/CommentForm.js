@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useContext } from 'react';
+import { CommentService } from '../../services/comment.service';
+// FIX: Use the correct AuthContext import path
+import { AuthContext } from '../../contexts/AuthContext';
 
 const CommentForm = ({ 
   postId, 
@@ -14,17 +16,24 @@ const CommentForm = ({
   const [content, setContent] = useState(initialContent);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  // In a real app, get these from authentication context
-  const currentUserId = 'user123';
-  const currentUserName = 'John Doe';
-  const currentUserAvatar = null;
+  // Get user info from auth context
+  const { currentUser } = useContext(AuthContext);
+  const currentUserId = currentUser?.id;
+  const currentUserName = currentUser?.name;
+  const currentUserAvatar = currentUser?.avatarUrl;
+
+  // If not logged in, do not allow comment form actions
+  if (!currentUserId || !currentUserName) {
+    return (
+      <div className="alert alert-warning">You must be logged in to comment.</div>
+    );
+  }
 
   const handleContentChange = (e) => {
     setContent(e.target.value);
     // Clear any previous error when user starts typing
     if (error) setError(null);
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -46,23 +55,23 @@ const CommentForm = ({
       
       if (isEditing) {
         // Update existing comment
-        response = await axios.put(`/api/comments/${commentId}`, commentData);
+        response = await CommentService.updateComment(commentId, commentData, currentUserId);
       } else if (parentId) {
         // Create a reply
-        response = await axios.post(`/api/comments/${parentId}/replies`, {
+        response = await CommentService.createComment({
           ...commentData,
           postId,
           parentId
         });
       } else {
         // Create a new comment
-        response = await axios.post(`/api/posts/${postId}/comments`, {
+        response = await CommentService.createComment({
           ...commentData,
           postId
         });
       }
       
-      onCommentAdded(response.data);
+      onCommentAdded(response);
       setContent('');
       setError(null);
     } catch (err) {

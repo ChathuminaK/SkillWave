@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { ProgressService } from '../../services/progress.service';
+import { useAuth } from '../../contexts/AuthContext';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorAlert from '../common/ErrorAlert';
 
 const ProgressTracker = ({ contentId, contentType = "LEARNING_PLAN" }) => {
   // Always default to LEARNING_PLAN for content type
-  const userId = localStorage.getItem('userId') || 'user123'; // Get from auth context in production
-  
+  const { currentUser } = useAuth();
+  const userId = currentUser?.id;
+
   const [progress, setProgress] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

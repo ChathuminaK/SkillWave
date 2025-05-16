@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const CommentActions = ({ comment, isAuthor, onReply, onEdit, onDelete }) => {
+const CommentActions = ({ comment, isAuthor, isPostOwner, onReply, onEdit, onDelete }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -65,29 +65,30 @@ const CommentActions = ({ comment, isAuthor, onReply, onEdit, onDelete }) => {
         </li>
         
         {isAuthor && (
-          <>
-            <li>
-              <button 
-                className="dropdown-item" 
-                onClick={() => handleAction('edit')}
-              >
-                <i className="bi bi-pencil me-2"></i>
-                Edit
-              </button>
-            </li>
-            <li>
-              <button 
-                className="dropdown-item text-danger" 
-                onClick={() => handleAction('delete')}
-              >
-                <i className="bi bi-trash me-2"></i>
-                Delete
-              </button>
-            </li>
-          </>
+          <li>
+            <button 
+              className="dropdown-item" 
+              onClick={() => handleAction('edit')}
+            >
+              <i className="bi bi-pencil me-2"></i>
+              Edit
+            </button>
+          </li>
         )}
         
-        {!isAuthor && (
+        {(isAuthor || isPostOwner) && (
+          <li>
+            <button 
+              className="dropdown-item text-danger" 
+              onClick={() => handleAction('delete')}
+            >
+              <i className="bi bi-trash me-2"></i>
+              Delete
+            </button>
+          </li>
+        )}
+        
+        {!isAuthor && !isPostOwner && (
           <li>
             <button 
               className="dropdown-item" 

@@ -1,5 +1,6 @@
 com\example\SkillWave\security\oauth2\user\GithubOAuth2UserInfo.class
 com\example\SkillWave\payload\ApiResponse.class
+com\example\SkillWave\payload\RefreshTokenRequest.class
 com\example\SkillWave\controller\ProgressController.class
 com\example\SkillWave\exception\ResourceNotFoundException.class
 com\example\SkillWave\config\AppProperties$Auth.class
@@ -23,7 +24,9 @@ com\example\SkillWave\config\DatabaseConfig.class
 com\example\SkillWave\repository\PostCommentRepository.class
 com\example\SkillWave\security\CustomOAuth2UserService.class
 com\example\SkillWave\service\impl\EducationalPostServiceImpl.class
+com\example\SkillWave\service\UserDetailsServiceImpl.class
 com\example\SkillWave\config\SecurityConfig.class
+com\example\SkillWave\config\WebMvcConfig.class
 com\example\SkillWave\security\oauth2\user\OAuth2UserInfo.class
 com\example\SkillWave\model\PostComment.class
 com\example\SkillWave\exception\GlobalExceptionHandler.class
@@ -47,6 +50,7 @@ com\example\SkillWave\security\CustomUserDetailsService.class
 com\example\SkillWave\security\oauth2\user\GoogleOAuth2UserInfo.class
 com\example\SkillWave\payload\JwtAuthenticationResponse.class
 com\example\SkillWave\security\OAuth2AuthenticationSuccessHandler.class
+com\example\SkillWave\controller\DatabaseRepairController.class
 com\example\SkillWave\repository\UserRepository.class
 com\example\SkillWave\security\CurrentUser.class
 com\example\SkillWave\security\UserPrincipal.class

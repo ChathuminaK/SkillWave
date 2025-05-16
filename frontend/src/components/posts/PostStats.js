@@ -16,7 +16,7 @@ const PostStats = ({ postId, initialStats }) => {
   });
   const [loading, setLoading] = useState(false);
   // In a real app, get this from authentication context
-  const currentUserId = 'user123';
+  // const currentUserId = 'user123';
 
   useEffect(() => {
     // Check if user has already liked or bookmarked this post

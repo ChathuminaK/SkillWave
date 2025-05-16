@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CommentItem from './CommentItem';
 import CommentForm from './CommentForm';
-import axios from 'axios';
+import { CommentService } from '../../services/comment.service';
 
 const CommentList = ({ postId }) => {
   const [comments, setComments] = useState([]);
@@ -21,11 +21,9 @@ const CommentList = ({ postId }) => {
     
     try {
       setLoading(true);
-      const response = await axios.get(`/api/posts/${postId}/comments`, {
-        params: { page, size: commentsPerPage }
-      });
+      const response = await CommentService.getCommentsByPostId(postId, page, commentsPerPage);
       
-      const { content, totalElements, last } = response.data;
+      const { content, totalElements, last } = response;
       
       setComments(prev => page === 0 ? content : [...prev, ...content]);
       setTotalComments(totalElements);
@@ -97,6 +95,7 @@ const CommentList = ({ postId }) => {
               comment={comment}
               onDelete={handleDeleteComment}
               onUpdate={handleUpdateComment}
+              postOwnerId={comments.length > 0 ? comments[0].postOwnerId : null}
             />
           ))}
           

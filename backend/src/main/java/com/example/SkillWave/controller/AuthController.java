@@ -6,10 +6,12 @@ import com.example.SkillWave.model.User;
 import com.example.SkillWave.payload.JwtAuthenticationResponse;
 import com.example.SkillWave.payload.LoginRequest;
 import com.example.SkillWave.payload.SignUpRequest;
+import com.example.SkillWave.payload.RefreshTokenRequest;
 import com.example.SkillWave.repository.UserRepository;
 import com.example.SkillWave.security.CurrentUser;
 import com.example.SkillWave.security.JwtTokenProvider;
 import com.example.SkillWave.security.UserPrincipal;
+import com.example.SkillWave.security.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +19,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
@@ -39,10 +44,15 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;    
 
     @Autowired
     private JwtTokenProvider tokenProvider;
+    
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -51,19 +61,25 @@ public class AuthController {
                         loginRequest.getEmail(),
                         loginRequest.getPassword()
                 )
-        );
-
+        );        
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = tokenProvider.generateToken(authentication);
+        String refreshToken = tokenProvider.generateRefreshToken(authentication);
         
         // Find the user and update last login time
         User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + loginRequest.getEmail()));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + loginRequest.getEmail()));        
         user.setLastLogin(LocalDateTime.now());
         userRepository.save(user);
         
-        return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
+        JwtAuthenticationResponse response = new JwtAuthenticationResponse(jwt, refreshToken);
+        response.setUserId(user.getId());
+        response.setName(user.getName());
+        response.setEmail(user.getEmail());
+        response.setProvider(user.getProvider());
+        
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/register")
@@ -83,14 +99,13 @@ public class AuthController {
         user.setAuthProvider("local");
         user.setCreatedAt(LocalDateTime.now());
         user.setLastLogin(LocalDateTime.now());
-        
-        // Set default roles
+          // Set default roles
         Set<String> roles = new HashSet<>();
         roles.add("ROLE_USER");
         user.setRoles(roles);
         
         // Save the user
-        User result = userRepository.save(user);
+        userRepository.save(user);
         
         // Generate JWT token
         Authentication authentication = authenticationManager.authenticate(
@@ -98,8 +113,15 @@ public class AuthController {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
+        String refreshToken = tokenProvider.generateRefreshToken(authentication);
         
-        return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
+        JwtAuthenticationResponse response = new JwtAuthenticationResponse(jwt, refreshToken);
+        response.setUserId(user.getId());
+        response.setName(user.getName());
+        response.setEmail(user.getEmail());
+        response.setProvider(user.getProvider());
+        
+        return ResponseEntity.ok(response);
     }
     
     /**
@@ -131,6 +153,77 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error retrieving user details", 
                                 "message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+        try {
+            // Validate the refresh token
+            String refreshToken = refreshTokenRequest.getRefreshToken();
+            if (refreshToken == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Refresh token is required"));
+            }
+            
+            // Verify the refresh token
+            if (!tokenProvider.validateToken(refreshToken)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Invalid refresh token"));
+            }
+            
+            // Get user information from the token
+            String email = tokenProvider.getUsernameFromToken(refreshToken);
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+            
+            // Create authentication object
+            UsernamePasswordAuthenticationToken authentication = 
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+              // Generate new access token
+            String newAccessToken = tokenProvider.generateToken(authentication);
+            
+            // Optionally generate new refresh token with extended expiry
+            String newRefreshToken = tokenProvider.generateRefreshToken(authentication);
+            
+            // Fetch user information to include in response
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+            
+            JwtAuthenticationResponse response = new JwtAuthenticationResponse(newAccessToken, newRefreshToken);
+            response.setUserId(user.getId());
+            response.setName(user.getName());
+            response.setEmail(user.getEmail());
+            response.setProvider(user.getProvider());
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to refresh token", "message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser(@CurrentUser UserPrincipal userPrincipal) {
+        // Since we're using stateless JWT tokens, the client should remove the token
+        // But we can still invalidate sessions or perform server-side actions if needed
+        
+        try {
+            if (userPrincipal != null) {
+                // Optional: Update last activity timestamp in the user record
+                User user = userRepository.findById(userPrincipal.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userPrincipal.getId()));
+                user.setLastLogin(LocalDateTime.now());
+                userRepository.save(user);
+                
+                // Log the logout action
+                logger.info("User logged out: {}", userPrincipal.getEmail());
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                "message", "You have been successfully logged out"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Logout failed", "message", e.getMessage()));
         }
     }
 }

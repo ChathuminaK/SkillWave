@@ -25,11 +25,11 @@ public class ProgressController {
     private ProgressService progressService;
     
     @PostMapping
-    public ResponseEntity<Progress> createProgress(@RequestBody Progress progress) {
+    public ResponseEntity<?> createProgress(@RequestBody Progress progress) {
         // Validate required fields
         if (progress.getUserId() == null || progress.getContentId() == null || 
             progress.getContentType() == null) {
-            throw new IllegalArgumentException("userId, contentId, and contentType are required");
+            return ResponseEntity.badRequest().body("userId, contentId, and contentType are required");
         }
         
         // Set default values if they're not provided
@@ -40,15 +40,25 @@ public class ProgressController {
             progress.setCompleted(false);
         }
         
-        Progress savedProgress = progressService.createOrUpdateProgress(progress);
-        return new ResponseEntity<>(savedProgress, HttpStatus.CREATED);
+        try {
+            Progress savedProgress = progressService.createOrUpdateProgress(progress);
+            return new ResponseEntity<>(savedProgress, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create progress: " + e.getMessage());
+        }
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Progress> getProgressById(@PathVariable Long id) {
-        Progress progress = progressService.getProgressById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Progress not found with id: " + id));
-        return ResponseEntity.ok(progress);
+    public ResponseEntity<?> getProgressById(@PathVariable Long id) {
+        try {
+            Progress progress = progressService.getProgressById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Progress not found with id: " + id));
+            return ResponseEntity.ok(progress);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch progress: " + e.getMessage());
+        }
     }
     
     @GetMapping("/user/{userId}")
@@ -169,65 +179,94 @@ public class ProgressController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Progress> updateProgress(
+    public ResponseEntity<?> updateProgress(
             @PathVariable Long id,
             @RequestBody Progress progressDetails) {
-        
-        Progress progress = progressService.getProgressById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Progress not found with id: " + id));
-        
-        // Update fields, but only if provided in the request
-        if (progressDetails.getProgressPercentage() != null) {
-            progress.setProgressPercentage(progressDetails.getProgressPercentage());
+        try {
+            Progress progress = progressService.getProgressById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Progress not found with id: " + id));
+            
+            // Update fields, but only if provided in the request
+            if (progressDetails.getProgressPercentage() != null) {
+                progress.setProgressPercentage(progressDetails.getProgressPercentage());
+            }
+            if (progressDetails.getCompleted() != null) {
+                progress.setCompleted(progressDetails.getCompleted());
+            }
+            if (progressDetails.getNotes() != null) {
+                progress.setNotes(progressDetails.getNotes());
+            }
+            
+            Progress updatedProgress = progressService.createOrUpdateProgress(progress);
+            return ResponseEntity.ok(updatedProgress);
+        } catch (ResourceNotFoundException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage() != null ? e.getMessage() : "Failed to update progress");
+            return ResponseEntity.status(500).body(error);
         }
-        if (progressDetails.getCompleted() != null) {
-            progress.setCompleted(progressDetails.getCompleted());
-        }
-        if (progressDetails.getNotes() != null) {
-            progress.setNotes(progressDetails.getNotes());
-        }
-        
-        Progress updatedProgress = progressService.createOrUpdateProgress(progress);
-        return ResponseEntity.ok(updatedProgress);
     }
     
     @PutMapping("/user/{userId}/content/{contentId}/type/{contentType}/percentage/{percentage}")
-    public ResponseEntity<Progress> updateProgressPercentage(
+    public ResponseEntity<?> updateProgressPercentage(
             @PathVariable String userId,
             @PathVariable Long contentId,
             @PathVariable String contentType,
             @PathVariable Integer percentage) {
-        
-        Progress updatedProgress = progressService.updateProgressPercentage(userId, contentId, contentType, percentage);
-        return ResponseEntity.ok(updatedProgress);
+        try {
+            Progress updatedProgress = progressService.updateProgressPercentage(userId, contentId, contentType, percentage);
+            return ResponseEntity.ok(updatedProgress);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage() != null ? e.getMessage() : "Failed to update progress percentage");
+            return ResponseEntity.status(500).body(error);
+        }
     }
     
     @PutMapping("/user/{userId}/content/{contentId}/type/{contentType}/complete")
-    public ResponseEntity<Progress> markAsCompleted(
+    public ResponseEntity<?> markAsCompleted(
             @PathVariable String userId,
             @PathVariable Long contentId,
             @PathVariable String contentType) {
-        
-        Progress progress = progressService.markAsCompleted(userId, contentId, contentType);
-        return ResponseEntity.ok(progress);
+        try {
+            Progress progress = progressService.markAsCompleted(userId, contentId, contentType);
+            return ResponseEntity.ok(progress);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage() != null ? e.getMessage() : "Failed to mark as completed");
+            return ResponseEntity.status(500).body(error);
+        }
     }
     
     @PutMapping("/user/{userId}/content/{contentId}/type/{contentType}/reset")
-    public ResponseEntity<Progress> resetProgress(
+    public ResponseEntity<?> resetProgress(
             @PathVariable String userId,
             @PathVariable Long contentId,
             @PathVariable String contentType) {
-        
-        Progress progress = progressService.resetProgress(userId, contentId, contentType);
-        return ResponseEntity.ok(progress);
+        try {
+            Progress progress = progressService.resetProgress(userId, contentId, contentType);
+            return ResponseEntity.ok(progress);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage() != null ? e.getMessage() : "Failed to reset progress");
+            return ResponseEntity.status(500).body(error);
+        }
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, Boolean>> deleteProgress(@PathVariable Long id) {
-        progressService.deleteProgress(id);
-        
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("deleted", Boolean.TRUE);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> deleteProgress(@PathVariable Long id) {
+        try {
+            progressService.deleteProgress(id);
+            Map<String, Boolean> response = new HashMap<>();
+            response.put("deleted", Boolean.TRUE);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage() != null ? e.getMessage() : "Failed to delete progress");
+            return ResponseEntity.status(500).body(error);
+        }
     }
 }

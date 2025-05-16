@@ -32,13 +32,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = getJwtFromRequest(request);
             
-            // For debugging
+            // Enhanced logging for debugging
+            logger.debug("Processing request: {} {}", request.getMethod(), request.getRequestURI());
+            
             if (jwt != null) {
-                System.out.println("Processing JWT token for: " + request.getRequestURI());
+                logger.debug("JWT token found for request: {}", request.getRequestURI());
+            } else {
+                logger.debug("No JWT token found in request: {}", request.getRequestURI());
             }
 
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String username = tokenProvider.getUsernameFromToken(jwt);
+                logger.debug("JWT token validated for user: {}", username);
 
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authentication = 
@@ -46,6 +51,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                logger.debug("Set authentication for user: {}", username);
+            } else {
+                // Anonymous authentication will be handled by AnonymousAuthenticationFilter
+                logger.debug("Request will use anonymous authentication: {}", request.getRequestURI());
             }
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);

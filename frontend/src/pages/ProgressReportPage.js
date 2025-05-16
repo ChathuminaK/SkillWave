@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { Navigate } from 'react-router-dom';
 import PageHeader from '../components/common/PageHeader';
 import LearningProgressReport from '../components/progress/LearningProgressReport';
+import { AuthContext } from '../context/AuthContext';
 
 const ProgressReportPage = () => {
+  const { isAuthenticated, loading } = useContext(AuthContext);
+  
+  // Redirect to login if not authenticated and not loading
+  if (!isAuthenticated && !loading) {
+    return <Navigate to="/login" replace />;
+  }
+  
   return (
     <>
       <PageHeader 

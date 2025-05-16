@@ -1,0 +1,355 @@
+{
+  "info": {
+    "_postman_id": "f2a5e6d7-c8b9-4a0d-b3e2-1f0c5d4e3a2b",
+    "name": "SkillWave API Collection",
+    "description": "API collection for testing SkillWave application endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "User login endpoint"
+          },
+          "response": []
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"newuser@example.com\",\n    \"password\": \"securePassword123\",\n    \"firstName\": \"New\",\n    \"lastName\": \"User\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "User registration endpoint"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh-token"]
+            },
+            "description": "Refresh the access token"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            },
+            "description": "User logout endpoint"
+          },
+          "response": []
+        },
+        {
+          "name": "Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/current-user",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "current-user"]
+            },
+            "description": "Get current user information"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication-related endpoints"
+    },
+    {
+      "name": "Learning Plans",
+      "item": [
+        {
+          "name": "Get All Learning Plans",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/learning-plans?page=0&size=10&sortBy=createdAt&direction=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "learning-plans"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "direction",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Get all learning plans with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Learning Plan by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/learning-plans/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "learning-plans", "1"]
+            },
+            "description": "Get a specific learning plan by ID"
+          },
+          "response": []
+        }
+      ],
+      "description": "Learning Plans endpoints"
+    },
+    {
+      "name": "Educational Posts",
+      "item": [
+        {
+          "name": "Get All Posts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/educational-posts?page=0&size=10&sortBy=createdAt&direction=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "educational-posts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "direction",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "Get all educational posts with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Post by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/educational-posts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "educational-posts", "1"]
+            },
+            "description": "Get a specific post by ID"
+          },
+          "response": []
+        }
+      ],
+      "description": "Educational Posts endpoints"
+    },
+    {
+      "name": "Comments",
+      "item": [
+        {
+          "name": "Get Comments for Post",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/comments/post/1/paginated?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "comments", "post", "1", "paginated"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get comments for a post with pagination"
+          },
+          "response": []
+        }
+      ],
+      "description": "Comments endpoints"
+    },
+    {
+      "name": "Progress",
+      "item": [
+        {
+          "name": "Get User Progress",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/progress/user/1?page=0&size=10&status=IN_PROGRESS",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "progress", "user", "1"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "IN_PROGRESS"
+                }
+              ]
+            },
+            "description": "Get progress for a user"
+          },
+          "response": []
+        }
+      ],
+      "description": "Progress tracking endpoints"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-store tokens from login response",
+          "if (pm.response.code === 200 && pm.test.response.json().accessToken) {",
+          "    var jsonData = pm.response.json();",
+          "    pm.environment.set(\"accessToken\", jsonData.accessToken);",
+          "    if (jsonData.refreshToken) {",
+          "        pm.environment.set(\"refreshToken\", jsonData.refreshToken);",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}

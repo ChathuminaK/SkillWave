@@ -1,18 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import CommentForm from './CommentForm';
 import CommentActions from './CommentActions';
-import axios from 'axios';
+import { CommentService } from '../../services/comment.service';
+import { AuthContext } from '../../contexts/AuthContext';
 
-const CommentItem = ({ comment, onDelete, onUpdate }) => {
+const CommentItem = ({ comment, onDelete, onUpdate, postOwnerId }) => {
   const [isReplying, setIsReplying] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
   const [replies, setReplies] = useState([]);
   const [loadingReplies, setLoadingReplies] = useState(false);
-  // In a real app, get this from authentication context
-  const currentUserId = 'user123';
+  const [error, setError] = useState(null);
+  // Get current user from auth context
+  const { currentUser } = useContext(AuthContext);
+  const currentUserId = currentUser?.id;
   
   const isAuthor = comment.userId === currentUserId;
+  const isPostOwner = postOwnerId === currentUserId;
   const hasReplies = comment.replyCount > 0;
 
   const formatDate = (dateString) => {
@@ -25,7 +29,13 @@ const CommentItem = ({ comment, onDelete, onUpdate }) => {
   };
 
   const handleEditClick = () => {
-    setIsEditing(!isEditing);
+    setIsEditing(true);
+    setError(null);
+  };
+
+  const handleEditCancel = () => {
+    setIsEditing(false);
+    setError(null);
   };
 
   const handleDeleteClick = async () => {
@@ -34,11 +44,10 @@ const CommentItem = ({ comment, onDelete, onUpdate }) => {
     }
     
     try {
-      await axios.delete(`/api/comments/${comment.id}`);
+      await CommentService.deleteComment(comment.id, currentUserId, postOwnerId);
       onDelete(comment.id);
     } catch (error) {
-      console.error('Error deleting comment:', error);
-      alert('Failed to delete comment. Please try again.');
+      setError(error.message || 'Failed to delete comment. Please try again.');
     }
   };
 
@@ -51,7 +60,6 @@ const CommentItem = ({ comment, onDelete, onUpdate }) => {
       setShowReplies(true);
     }
   };
-
   const toggleReplies = async () => {
     if (showReplies) {
       setShowReplies(false);
@@ -65,8 +73,9 @@ const CommentItem = ({ comment, onDelete, onUpdate }) => {
     
     try {
       setLoadingReplies(true);
-      const response = await axios.get(`/api/comments/${comment.id}/replies`);
-      setReplies(response.data);
+      // Get replies using the endpoint
+      const response = await CommentService.getCommentsByParentId(comment.id);
+      setReplies(response.content || []);
       setShowReplies(true);
     } catch (error) {
       console.error('Error loading replies:', error);
@@ -75,17 +84,14 @@ const CommentItem = ({ comment, onDelete, onUpdate }) => {
       setLoadingReplies(false);
     }
   };
-
   const handleLikeComment = async () => {
     try {
       const action = comment.userLiked ? 'unlike' : 'like';
-      const response = await axios.post(`/api/comments/${comment.id}/${action}`, {
-        userId: currentUserId
-      });
+      const response = await CommentService.likeComment(comment.id, currentUserId, action);
       
       onUpdate({
         ...comment,
-        likeCount: response.data.likeCount,
+        likeCount: response.likeCount,
         userLiked: !comment.userLiked
       });
     } catch (error) {
@@ -128,6 +134,7 @@ const CommentItem = ({ comment, onDelete, onUpdate }) => {
             <CommentActions 
               comment={comment}
               isAuthor={isAuthor}
+              isPostOwner={isPostOwner}
               onReply={handleReplyClick}
               onEdit={handleEditClick}
               onDelete={handleDeleteClick}
@@ -140,8 +147,12 @@ const CommentItem = ({ comment, onDelete, onUpdate }) => {
               commentId={comment.id}
               initialContent={comment.content}
               isEditing={true}
-              onCommentAdded={onUpdate}
-              onCancel={() => setIsEditing(false)}
+              onCommentAdded={(updatedComment) => {
+                onUpdate(updatedComment);
+                setIsEditing(false);
+                setError(null);
+              }}
+              onCancel={handleEditCancel}
             />
           ) : (
             <>
@@ -184,6 +195,8 @@ const CommentItem = ({ comment, onDelete, onUpdate }) => {
             </>
           )}
           
+          {error && <div className="alert alert-danger my-2">{error}</div>}
+          
           {isReplying && (
             <div className="mt-3">
               <CommentForm 
@@ -204,6 +217,7 @@ const CommentItem = ({ comment, onDelete, onUpdate }) => {
                   comment={reply}
                   onDelete={onDelete}
                   onUpdate={onUpdate}
+                  postOwnerId={postOwnerId}
                 />
               ))}
             </div>

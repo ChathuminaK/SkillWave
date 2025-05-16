@@ -3,8 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { PostService } from '../../services/post.service';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorAlert from '../common/ErrorAlert';
+import { useAuth } from '../../contexts/AuthContext';
 
 const PostForm = () => {
+  const { currentUser } = useAuth();
+  const userId = currentUser?.id;
+  const userName = currentUser?.name;
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = !!id;
@@ -26,11 +30,6 @@ const PostForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0); // Used to track upload progress
-  
-  // For this demo, we'll use a hardcoded user ID
-  // In a real app, this would come from authentication
-  const userId = 'user123';
-  const userName = 'John Doe';
   
   // Available categories and difficulty levels
   const categories = [

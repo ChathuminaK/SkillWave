@@ -41,6 +41,21 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    public String generateRefreshToken(Authentication authentication) {
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
+        Date now = new Date();
+        // Make refresh token valid for a longer period (e.g., 7 days)
+        Date expiryDate = new Date(now.getTime() + (jwtExpirationInMs * 7));
+
+        return Jwts.builder()
+                .setSubject(userPrincipal.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(expiryDate)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .compact();
+    }
+
     public String getUsernameFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())

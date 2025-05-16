@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import PageHeader from '../components/common/PageHeader';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorAlert from '../components/common/ErrorAlert';
 import FloatingActionButton from '../components/common/FloatingActionButton';
 import { usePostContext } from '../contexts/PostContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const EducationalPostsPage = () => {
   const { 
@@ -20,8 +21,11 @@ const EducationalPostsPage = () => {
     deletePost
   } = usePostContext();
 
+  const { currentUser } = useAuth();
+  const userId = currentUser?.id;
+
   const renderPostCard = (post) => {
-    const isAuthor = post.userId === 'user123'; // Replace with actual auth check
+    const isAuthor = post.userId === userId;
     
     return (
       <div className="col-md-6 col-lg-4 mb-4" key={post.id}>

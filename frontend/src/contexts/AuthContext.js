@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthService } from '../services/auth.service';
+import { TokenUtil } from '../services/token.util';
 
 const AuthContext = createContext();
 
@@ -16,12 +17,22 @@ export const AuthProvider = ({ children }) => {
     const checkAuthStatus = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('auth_token');
+        const token = TokenUtil.getToken();
         
         if (!token) {
           setIsAuthenticated(false);
           setCurrentUser(null);
           return;
+        }
+        
+        // Check if token needs refresh
+        if (AuthService.isTokenExpiring()) {
+          const refreshSuccess = await AuthService.refreshToken();
+          if (!refreshSuccess) {
+            // If refresh fails, log out the user
+            handleLogout();
+            return;
+          }
         }
         
         // Verify the token with the backend and get user data
@@ -32,15 +43,11 @@ export const AuthProvider = ({ children }) => {
           setIsAuthenticated(true);
         } else {
           // Token is invalid or expired
-          localStorage.removeItem('auth_token');
-          setIsAuthenticated(false);
-          setCurrentUser(null);
+          handleLogout();
         }
       } catch (err) {
         console.error('Error checking authentication status:', err);
-        localStorage.removeItem('auth_token');
-        setIsAuthenticated(false);
-        setCurrentUser(null);
+        handleLogout();
         setError('Authentication failed. Please log in again.');
       } finally {
         setLoading(false);
@@ -50,23 +57,45 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus();
   }, []);
 
+  // Set up a periodic token refresh check
+  useEffect(() => {
+    if (isAuthenticated) {
+      const tokenCheckInterval = setInterval(async () => {
+        try {
+          if (AuthService.isTokenExpiring()) {
+            const refreshSuccess = await AuthService.refreshToken();
+            if (!refreshSuccess) {
+              handleLogout();
+            }
+          }
+        } catch (error) {
+          console.error('Token refresh error:', error);
+          handleLogout();
+        }
+      }, 60000); // Check every minute
+      
+      return () => clearInterval(tokenCheckInterval);
+    }
+  }, [isAuthenticated]);
+
   const login = async (email, password) => {
     try {
       setLoading(true);
       const response = await AuthService.login(email, password);
       
-      // Store the JWT token in localStorage
-      localStorage.setItem('auth_token', response.token);
-      localStorage.setItem('userId', response.userId);
-      
-      // Get user data
-      const userData = await AuthService.getCurrentUser();
-      
-      setCurrentUser(userData);
-      setIsAuthenticated(true);
-      setError(null);
-      
-      return userData;
+      if (response) {
+        // Auth data should already be stored in localStorage by AuthService.login
+        // Get user data
+        const userData = await AuthService.getCurrentUser();
+        
+        setCurrentUser(userData);
+        setIsAuthenticated(true);
+        setError(null);
+        
+        return userData;
+      } else {
+        throw new Error('Login failed');
+      }
     } catch (err) {
       setError(err.message || 'Login failed. Please try again.');
       throw err;
@@ -81,11 +110,16 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('userId');
-      setIsAuthenticated(false);
-      setCurrentUser(null);
+      handleLogout();
     }
+  };
+
+  const handleLogout = () => {
+    TokenUtil.removeTokens();
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+    setError(null);
+    window.location.href = '/login'; // Redirect to login page
   };
 
   const updateUserProfile = async (userData) => {

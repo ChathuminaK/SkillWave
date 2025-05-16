@@ -27,17 +27,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Transactional
-    public UserDetails loadUserById(String id) {
-        // Check if ID is numeric (for backward compatibility)
-        if (id.matches("\\d+")) {
-            Long numericId = Long.parseLong(id);
-            User user = userRepository.findById(numericId)
-                    .orElseThrow(() -> 
-                            new ResourceNotFoundException("User not found with id: " + numericId));
-            return UserPrincipal.create(user);
-        } else {
-            // If ID is not numeric, try to find by email
-            return loadUserByUsername(id);
-        }
+    public UserDetails loadUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> 
+                        new ResourceNotFoundException("User not found with id: " + id));
+        return UserPrincipal.create(user);
     }
 }
