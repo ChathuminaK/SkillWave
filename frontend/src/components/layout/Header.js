@@ -50,7 +50,7 @@ const Header = () => {
             <li className="nav-item mx-1">
               <Link 
                 className={`nav-link d-flex flex-column align-items-center px-3 py-2 ${location.pathname === '/' ? 'active' : ''}`}
-                to="/"
+                to="/dashboard"
               >
                 <i className="bi bi-house-door fs-5"></i>
                 <span className="small">Home</span>
