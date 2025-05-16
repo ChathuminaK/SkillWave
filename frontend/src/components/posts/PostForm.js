@@ -165,76 +165,49 @@ const PostForm = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.title || !formData.content) {
-      setError('Title and content are required.');
-      return;
-    }
-
-    // Simulate upload progress updates
-    const updateProgress = (progress) => {
-      setUploadProgress(progress);
-    };
-    
+    setError(null);
+    setLoading(true);
     try {
-      setLoading(true);
-      setError(null);
-      
-      // Create FormData object for multipart/form-data
+      // Prepare FormData for media upload
       const formDataToSend = new FormData();
-      formDataToSend.append('title', formData.title);
-      formDataToSend.append('content', formData.content);
+      formDataToSend.append('title', formData.title.trim());
+      formDataToSend.append('content', formData.content.trim());
       formDataToSend.append('category', formData.category);
       formDataToSend.append('difficultyLevel', formData.difficultyLevel);
       formDataToSend.append('estimatedTime', formData.estimatedTime);
-      formDataToSend.append('userId', userId);
-      formDataToSend.append('userName', userName);
-      
-      // Add tags
-      if (formData.tags.length > 0) {
-        formDataToSend.append('tags', JSON.stringify(formData.tags));
+      formDataToSend.append('tags', JSON.stringify(formData.tags));
+      formDataToSend.append('user_id', String(userId));
+      formDataToSend.append('user_name', userName);
+      if (mediaFiles.length > 0) {
+        mediaFiles.forEach(file => formDataToSend.append('media', file));
       }
-      
-      // Add existing media for edit mode
       if (isEditMode && existingMedia.length > 0) {
         formDataToSend.append('existingMedia', JSON.stringify(existingMedia));
       }
-      
-      // Add media files
-      if (mediaFiles.length > 0) {
-        mediaFiles.forEach(file => {
-          formDataToSend.append('media', file);
-        });
+      let response;
+      if (isEditMode) {
+        response = await PostService.updateWithMedia(id, formDataToSend);
+      } else {
+        response = await PostService.createWithMedia(formDataToSend);
       }
-      
-      // Fake progress updates during upload
-      let progress = 0;
-      const progressInterval = setInterval(() => {
-        progress += 10;
-        if (progress <= 90) updateProgress(progress);
-      }, 300);
-
-      try {
-        let result;
-        if (isEditMode) {
-          result = await PostService.updatePostWithMedia(id, formDataToSend);
-        } else {
-          result = await PostService.createPostWithMedia(formDataToSend);
-        }
-        
-        // Final progress update
-        updateProgress(100);
-        clearInterval(progressInterval);
-        
-        // Redirect to the post detail page
-        navigate(`/posts/${result.id}`);
-      } catch (error) {
-        clearInterval(progressInterval);
-        throw error;
-      }
+      navigate(`/posts/${response.id}`);
     } catch (err) {
-      setError(`Failed to ${isEditMode ? 'update' : 'create'} post. Please try again.`);
-      console.error(err);
+      setError(err.message || 'Failed to save post.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle delete post
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this post?')) return;
+    setError(null);
+    setLoading(true);
+    try {
+      await PostService.delete(id);
+      navigate('/posts');
+    } catch (err) {
+      setError(err.message || 'Failed to delete post.');
     } finally {
       setLoading(false);
     }
@@ -534,6 +507,16 @@ const PostForm = () => {
                   <>{isEditMode ? 'Update Post' : 'Publish Post'}</>
                 )}
               </button>
+              {isEditMode && (
+                <button
+                  type="button"
+                  className="btn btn-danger ms-2"
+                  onClick={handleDelete}
+                  disabled={loading}
+                >
+                  Delete Post
+                </button>
+              )}
             </div>
           </form>
         </div>
