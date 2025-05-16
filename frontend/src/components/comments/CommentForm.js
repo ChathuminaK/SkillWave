@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useContext } from 'react';
+import { CommentService } from '../../services/comment.service';
+import { AuthContext } from '../../context/AuthContext';
 
 const CommentForm = ({ 
   postId, 
@@ -14,10 +15,11 @@ const CommentForm = ({
   const [content, setContent] = useState(initialContent);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  // In a real app, get these from authentication context
-  const currentUserId = 'user123';
-  const currentUserName = 'John Doe';
-  const currentUserAvatar = null;
+  // Get user info from auth context
+  const { currentUser } = useContext(AuthContext);
+  const currentUserId = currentUser?.id || 'user123';
+  const currentUserName = currentUser?.name || 'John Doe';
+  const currentUserAvatar = currentUser?.avatarUrl || null;
 
   const handleContentChange = (e) => {
     setContent(e.target.value);

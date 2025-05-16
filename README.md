@@ -1,19 +1,26 @@
-# SkillWave
+# SkillWave Learning Platform
 
-SkillWave is a comprehensive skill-sharing and learning platform designed to connect individuals passionate about developing and sharing various skills—such as coding, cooking, photography, and DIY crafts. The platform enables users to create accounts, follow others, share posts with photos or videos, and track their learning progress. SkillWave aims to build a vibrant community where users can connect, inspire, and learn from each other's experiences and expertise.
+SkillWave is a comprehensive e-learning platform that enables users to create, share, and participate in online courses.
 
-## Table of Contents
+## Project Structure
 
-- [Features](#features)
-- [System Architecture](#system-architecture)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Functional Overview](#functional-overview)
-- [Contributors](#contributors)
-- [License](#license)
-- [References](#references)
+This repository contains both the backend and frontend codebases:
 
----
+```
+SkillWave/
+├── backend/              # Spring Boot backend
+│   ├── src/              # Source code
+│   ├── pom.xml           # Maven configuration
+│   └── README.md         # Backend documentation
+├── frontend/             # React frontend
+│   ├── public/           # Static files
+│   ├── src/              # Source code
+│   ├── package.json      # npm configuration
+│   └── README.md         # Frontend documentation
+├── postman/              # Postman collections for API testing
+├── uploads/              # User uploaded content (media, documents, etc.)
+└── README.md             # Main documentation (this file)
+```
 
 ## Features
 
@@ -140,29 +147,4 @@ The `postman` directory contains Postman collections for testing the API endpoin
 
 ## License
 
-This project is for educational purposes as part of the Programming Applications and Frameworks (IT3030) course at the Sri Lanka Institute of Information Technology.
-
----
-
-## References
-
-- [Spring Boot Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/)
-- [React Documentation](https://reactjs.org/docs/getting-started.html)
-- [JWT Authentication](https://jwt.io/introduction/)
-- [OAuth 2.0 Specification](https://oauth.net/2/)
-- [React Router Documentation](https://reactrouter.com/)
-- [Spring Security Documentation](https://docs.spring.io/spring-security/reference/)
-- [MySQL Documentation](https://dev.mysql.com/doc/)
-- [H2 Database Documentation](https://www.h2database.com/html/main.html)
-- [Spring Data JPA Documentation](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
-- [Material UI Documentation](https://mui.com/getting-started/usage/)
-- [React Context API](https://reactjs.org/docs/context.html)
-- [Axios HTTP Client](https://axios-http.com/docs/intro)
-- [JSON Web Token (JWT) Best Practices](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-jwt-bcp)
-- [Web Content Accessibility Guidelines (WCAG)](https://www.w3.org/WAI/standards-guidelines/wcag/)
-- [RESTful API Design](https://restfulapi.net/)
-- [Testing Library Documentation](https://testing-library.com/docs/)
-- [Jest Testing Framework](https://jestjs.io/docs/getting-started)
-- [Spring Boot Testing Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.testing)
-- [React Hooks Documentation](https://reactjs.org/docs/hooks-intro.html)
-- [Cross-Origin Resource Sharing (CORS)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
+This project is licensed under the MIT License - see the LICENSE file for details.

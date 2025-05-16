@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { ProgressService } from '../../services/progress.service';
-import { useProgress } from '../../contexts/ProgressContext';
+import { AuthContext } from '../../context/AuthContext';
 
-const ProgressIndicator = ({ contentId, contentType }) => {
-  const { userId } = useProgress();
+/**
+ * A compact progress indicator that shows the current progress for a specific content item
+ * Used in list views and cards to show quick progress status
+ */
+const ProgressIndicator = ({ contentId, contentType = "LEARNING_PLAN", showDate = true, compact = false }) => {
+  const { currentUser } = useContext(AuthContext);
+  const userId = currentUser?.id || localStorage.getItem('userId') || 'user123';
+  
   const [progress, setProgress] = useState(null);
   const [loading, setLoading] = useState(true);
 

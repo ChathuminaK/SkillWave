@@ -6,10 +6,12 @@ import { useAuth } from '../contexts/AuthContext';
 
 const ProgressReportPage = () => {
   const { isAuthenticated, loading } = useAuth();
+
   // Redirect to login if not authenticated and not loading
   if (!isAuthenticated && !loading) {
     return <Navigate to="/login" replace />;
   }
+
   return (
     <>
       <PageHeader 
