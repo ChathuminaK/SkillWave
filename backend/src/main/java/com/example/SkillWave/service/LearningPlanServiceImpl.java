@@ -73,10 +73,9 @@ public class LearningPlanServiceImpl implements LearningPlanService {
         if (learningPlan.getDescription() != null && !learningPlan.getDescription().trim().isEmpty()) {
             existingLearningPlan.setDescription(learningPlan.getDescription());
         }
-        // Handle topics with special care due to ElementCollection
+        
         if (learningPlan.getTopics() != null) {
-            existingLearningPlan.getTopics().clear();
-            existingLearningPlan.getTopics().addAll(learningPlan.getTopics());
+            existingLearningPlan.setTopics(learningPlan.getTopics());
         }
         if (learningPlan.getResources() != null) {
             existingLearningPlan.setResources(learningPlan.getResources());
@@ -87,12 +86,9 @@ public class LearningPlanServiceImpl implements LearningPlanService {
         if (learningPlan.getMediaUrls() != null) {
             existingLearningPlan.setMediaUrls(learningPlan.getMediaUrls());
         }
-        if (learningPlan.getUserName() != null) {
-            existingLearningPlan.setUserName(learningPlan.getUserName());
-        }
-        if (learningPlan.getTargetCompletionDate() != null) {
-            existingLearningPlan.setTargetCompletionDate(learningPlan.getTargetCompletionDate());
-        }
+
+        existingLearningPlan.setTimeline(learningPlan.getTimeline());
+
         return learningPlanRepository.save(existingLearningPlan);
     }
 

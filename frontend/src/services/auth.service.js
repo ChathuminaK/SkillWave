@@ -1,8 +1,6 @@
 import api from './api.service';
-import { TokenUtil } from './token.util';
+import TokenUtil from './token.util';
 import { extractErrorMessage } from '../utils/extractErrorMessage';
-
-// eslint-disable-next-line
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 export const AuthService = {  
@@ -44,10 +42,22 @@ export const AuthService = {
       return response.data;
     } catch (error) {
       console.error('Registration error:', error);
-      throw new Error(extractErrorMessage(error));
+      throw error;
     }
   },
-  
+
+  // Get current authenticated user info
+  getCurrentUser: async () => {
+    try {
+      const response = await api.get('/api/auth/current-user');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+      return null;
+    }
+  },
+
+  // Logout - invalidate token on server
   logout: async () => {
     try {
       // Call backend logout endpoint
@@ -60,32 +70,15 @@ export const AuthService = {
       return true;
     } catch (error) {
       console.error('Logout error:', error);
-      // Still remove tokens even if the API call fails
-      TokenUtil.removeTokens();
-      localStorage.removeItem('userId');
-      
-      throw new Error(extractErrorMessage(error));
+      throw error;
     }
   },
-  
-  refreshToken: async () => {
+
+  // Update user profile
+  updateProfile: async (userData) => {
     try {
-      const refreshToken = TokenUtil.getRefreshToken();
-      if (!refreshToken) {
-        return false;
-      }
-      
-      const response = await api.post('/api/auth/refresh-token', { refreshToken });
-      
-      if (response.data.accessToken) {
-        TokenUtil.saveToken(response.data.accessToken);
-        if (response.data.refreshToken) {
-          TokenUtil.saveRefreshToken(response.data.refreshToken);
-        }
-        return true;
-      }
-      
-      return false;
+      const response = await api.put('/api/auth/profile', userData);
+      return response.data;
     } catch (error) {
       console.error('Token refresh error:', error);
       return false;

@@ -12,6 +12,21 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Define handleLogout to clear auth state and tokens
+  const handleLogout = async () => {
+    try {
+      setIsAuthenticated(false);
+      setCurrentUser(null);
+      TokenUtil.removeTokens();
+      localStorage.removeItem('userId');
+    } catch (err) {
+      setIsAuthenticated(false);
+      setCurrentUser(null);
+      TokenUtil.removeTokens();
+      localStorage.removeItem('userId');
+    }
+  };
+
   useEffect(() => {
     // Check if the user is authenticated on initial load
     const checkAuthStatus = async () => {
@@ -110,16 +125,11 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      handleLogout();
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('userId');
+      setIsAuthenticated(false);
+      setCurrentUser(null);
     }
-  };
-
-  const handleLogout = () => {
-    TokenUtil.removeTokens();
-    setIsAuthenticated(false);
-    setCurrentUser(null);
-    setError(null);
-    window.location.href = '/login'; // Redirect to login page
   };
 
   const updateUserProfile = async (userData) => {

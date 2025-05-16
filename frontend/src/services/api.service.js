@@ -37,68 +37,37 @@ api.interceptors.request.use(
 
 // Response interceptor
 api.interceptors.response.use(
-  (response) => {
-    // Log response in development environment
-    if (process.env.NODE_ENV === 'development') {
-      console.log('API Response:', response.status, response.config.url);
-    }
-    return response;
-  },
-  async (error) => {
-    // Log error in development environment
-    if (process.env.NODE_ENV === 'development') {
-      console.error('API Error:', 
-        error.response?.status, 
-        error.config?.url, 
-        error.response?.data
-      );
-    }
+  response => response,
+  error => {
+    // Log the error details
+    console.error('API Error:', error.response || error);
     
-    const originalRequest = error.config;
-    
-    // Handle 401 Unauthorized errors - token expired or invalid
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
-      try {
-        // Import AuthService dynamically to avoid circular dependencies
-        const { AuthService } = await import('./auth.service');
-        const refreshed = await AuthService.refreshToken();
+    // Handle specific error cases
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          // Handle unauthorized - redirect to login
+          localStorage.removeItem('auth_token');
+          // Redirect to login if outside of login page
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+          }
+          break;
         
-        if (refreshed) {
-          // Update request with new token and retry
-          const token = TokenUtil.getToken();
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return api(originalRequest);
-        }
-        
-        // If refresh failed, logout the user
-        AuthService.logout();
-        // Prevent infinite redirect loop
-        if (!window.location.pathname.startsWith('/login')) {
-          window.location.href = '/login?session=expired';
-        }
-        return Promise.reject(error);
-      } catch (refreshError) {
-        console.error("Error refreshing token:", refreshError);
-        // Clear tokens on refresh error
-        const { AuthService } = await import('./auth.service');
-        AuthService.logout();
-        if (!window.location.pathname.startsWith('/login')) {
-          window.location.href = '/login?session=expired';
-        }
-        return Promise.reject(error);
+        case 404:
+          console.error('Resource not found:', error.config.url);
+          break;
+          
+        case 500:
+          console.error('Server error:', error.response.data);
+          break;
+          
+        default:
+          console.error(`API error (${error.response.status}):`, error.response.data);
       }
-    }
-    
-    // Handle 404 Not Found
-    if (error.response?.status === 404) {
-      console.error('Resource not found:', error.config?.url);
-    }
-    
-    // Handle 500 server errors
-    if (error.response?.status >= 500) {
-      console.error('Server error:', error.response?.data);
+    } else if (error.request) {
+      // Network error (no response received)
+      console.error('Network error - no response received:', error.request);
     }
     
     return Promise.reject(error);

@@ -1,8 +1,7 @@
 import React, { useState, useContext } from 'react';
 import CommentForm from './CommentForm';
 import CommentActions from './CommentActions';
-import { CommentService } from '../../services/comment.service';
-import { AuthContext } from '../../contexts/AuthContext';
+import axios from 'axios';
 
 const CommentItem = ({ comment, onDelete, onUpdate, postOwnerId }) => {
   const [isReplying, setIsReplying] = useState(false);
@@ -10,10 +9,8 @@ const CommentItem = ({ comment, onDelete, onUpdate, postOwnerId }) => {
   const [showReplies, setShowReplies] = useState(false);
   const [replies, setReplies] = useState([]);
   const [loadingReplies, setLoadingReplies] = useState(false);
-  const [error, setError] = useState(null);
-  // Get current user from auth context
-  const { currentUser } = useContext(AuthContext);
-  const currentUserId = currentUser?.id;
+  // In a real app, get this from authentication context
+  const currentUserId = 'user123';
   
   const isAuthor = comment.userId === currentUserId;
   const isPostOwner = postOwnerId === currentUserId;
@@ -37,14 +34,13 @@ const CommentItem = ({ comment, onDelete, onUpdate, postOwnerId }) => {
     setIsEditing(false);
     setError(null);
   };
-
   const handleDeleteClick = async () => {
     if (!window.confirm('Are you sure you want to delete this comment?')) {
       return;
     }
     
     try {
-      await CommentService.deleteComment(comment.id, currentUserId, postOwnerId);
+      await axios.delete(`/api/comments/${comment.id}`);
       onDelete(comment.id);
     } catch (error) {
       setError(error.message || 'Failed to delete comment. Please try again.');

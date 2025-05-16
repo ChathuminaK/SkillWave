@@ -146,9 +146,8 @@ public class LearningPlanController {
                 return ResponseEntity.status(404).body("Learning plan not found with id: " + id);
             }
             LearningPlan existingPlan = learningPlanService.getLearningPlanById(id);
-            if (existingPlan == null) {
-                return ResponseEntity.status(404).body("Learning plan not found with id: " + id);
-            }
+            
+            // Parse JSON values with null checks
             List<String> topics = new ArrayList<>();
             if (topicsJson != null && !topicsJson.isEmpty()) {
                 topics = parseJsonArray(topicsJson);
@@ -164,8 +163,7 @@ public class LearningPlanController {
             }
             existingPlan.setTitle(title != null ? title : "");
             existingPlan.setDescription(description != null ? description : "");
-            existingPlan.getTopics().clear();
-            existingPlan.getTopics().addAll(topics);
+            existingPlan.setTopics(topics);
             existingPlan.setResources(resources);
             existingPlan.setTimeline(timeline != null ? timeline : "");
             // Set user info from either camelCase or snake_case
@@ -217,9 +215,7 @@ public class LearningPlanController {
         } catch (Exception e) {
             System.err.println("Error updating learning plan with media: " + e.getMessage());
             e.printStackTrace();
-            Map<String, String> error = new HashMap<>();
-            error.put("message", e.getMessage() != null ? e.getMessage() : "Failed to update learning plan");
-            return ResponseEntity.status(500).body(error);
+            throw new RuntimeException("Failed to update learning plan with media: " + e.getMessage(), e);
         }
     }
 

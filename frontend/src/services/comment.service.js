@@ -66,8 +66,7 @@ export const CommentService = {
       throw new Error(msg);
     }
   },
-  
-  // Count comments for a post
+    // Count comments for a post
   countCommentsByPostId: async (postId) => {
     try {
       const response = await api.get(`/api/comments/count/post/${postId}`);

@@ -6,8 +6,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorAlert from '../common/ErrorAlert';
 
 const LearningProgressReport = () => {
-  const { currentUser } = useContext(AuthContext);
-  // const userId = currentUser?.id || localStorage.getItem('userId') || 'user123';
+  const userId = localStorage.getItem('userId') || 'user123'; // Get from auth context in production
   
   const [progress, setProgress] = useState([]);
   const [completed, setCompleted] = useState([]);
