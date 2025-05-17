@@ -70,7 +70,9 @@ export default function HomePage() {
               border: '1px solid',
               borderColor: 'divider',
               backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.8)',
-              backdropFilter: 'blur(20px)'
+              backdropFilter: 'blur(20px)',
+              backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -83,8 +85,11 @@ export default function HomePage() {
                   fontWeight: activeTab === 0 ? 600 : 400,
                   color: activeTab === 0 ? 'primary.main' : 'text.primary',
                   backgroundColor: activeTab === 0 ? 'action.selected' : 'transparent',
+                  boxShadow: activeTab === 0 ? '0 2px 8px rgba(106, 27, 154, 0.15)' : 'none',
+                  transition: 'all 0.2s ease',
                   '&:hover': {
-                    backgroundColor: activeTab === 0 ? 'action.selected' : 'action.hover'
+                    backgroundColor: activeTab === 0 ? 'action.selected' : 'action.hover',
+                    transform: 'translateX(4px)'
                   }
                 }}
                 onClick={() => handleTabChange(0)}
@@ -100,8 +105,11 @@ export default function HomePage() {
                   fontWeight: activeTab === 1 ? 600 : 400,
                   color: activeTab === 1 ? 'primary.main' : 'text.primary',
                   backgroundColor: activeTab === 1 ? 'action.selected' : 'transparent',
+                  boxShadow: activeTab === 1 ? '0 2px 8px rgba(106, 27, 154, 0.15)' : 'none',
+                  transition: 'all 0.2s ease',
                   '&:hover': {
-                    backgroundColor: activeTab === 1 ? 'action.selected' : 'action.hover'
+                    backgroundColor: activeTab === 1 ? 'action.selected' : 'action.hover',
+                    transform: 'translateX(4px)'
                   }
                 }}
                 onClick={() => handleTabChange(1)}
@@ -114,8 +122,10 @@ export default function HomePage() {
                   justifyContent: 'flex-start',
                   borderRadius: 3,
                   py: 1.5,
+                  transition: 'all 0.2s ease',
                   '&:hover': {
-                    backgroundColor: 'action.hover'
+                    backgroundColor: 'action.hover',
+                    transform: 'translateX(4px)'
                   }
                 }}
                 onClick={() => navigate('/explore')}
@@ -123,6 +133,31 @@ export default function HomePage() {
                 Network
               </Button>
             </Box>
+            
+            {isAuthenticated && (
+              <Box sx={{ mt: 4 }}>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  startIcon={<AddIcon />}
+                  sx={{ 
+                    mt: 2,
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    py: 1.5,
+                    borderRadius: 3,
+                    background: 'linear-gradient(45deg, #6a1b9a 30%, #9c27b0 90%)',
+                    boxShadow: '0 4px 12px rgba(106, 27, 154, 0.25)',
+                    '&:hover': {
+                      boxShadow: '0 6px 18px rgba(106, 27, 154, 0.3)',
+                    }
+                  }}
+                  onClick={() => setCreatePostOpen(true)}
+                >
+                  Create Post
+                </Button>
+              </Box>
+            )}
           </Paper>
         </Grid>
 
@@ -138,13 +173,23 @@ export default function HomePage() {
               border: '1px solid',
               borderColor: 'divider',
               backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.8)',
-              backdropFilter: 'blur(20px)'
+              backdropFilter: 'blur(20px)',
+              backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
             }}
           >
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <Avatar 
                 src={getFullImageUrl(currentUser?.profilePicture) || '/default-avatar.png'}
-                sx={{ width: 48, height: 48, cursor: 'pointer' }}
+                sx={{ 
+                  width: 48, 
+                  height: 48, 
+                  cursor: 'pointer',
+                  border: '2px solid #fff',
+                  boxShadow: '0 2px 10px rgba(106, 27, 154, 0.2)',
+                  transition: 'transform 0.2s ease',
+                  '&:hover': { transform: 'scale(1.1)' }
+                }}
                 onClick={() => navigate(`/profile/${currentUser?.id}`)}
               />
               <TextField
@@ -154,7 +199,7 @@ export default function HomePage() {
                 size="small"
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    borderRadius: 3,
+                    borderRadius: 10,
                     backgroundColor: (theme) => 
                       theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
                     '&:hover': {
@@ -162,10 +207,16 @@ export default function HomePage() {
                         borderColor: 'primary.main',
                         borderWidth: '1px'
                       }
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'divider'
                     }
                   }
                 }}
                 onClick={() => setCreatePostOpen(true)}
+                InputProps={{
+                  sx: { py: 1.5, px: 2 }
+                }}
               />
               <Tooltip title="Create post">
                 <IconButton
@@ -173,12 +224,14 @@ export default function HomePage() {
                   sx={{ 
                     backgroundColor: 'primary.main',
                     color: 'white',
-                    width: 40,
-                    height: 40,
+                    width: 48,
+                    height: 48,
                     transition: 'all 0.2s ease',
+                    boxShadow: '0 4px 12px rgba(106, 27, 154, 0.25)',
                     '&:hover': { 
                       backgroundColor: 'primary.dark',
-                      transform: 'scale(1.05)' 
+                      transform: 'scale(1.05)',
+                      boxShadow: '0 6px 16px rgba(106, 27, 154, 0.3)'
                     }
                   }}
                   onClick={() => setCreatePostOpen(true)}
@@ -191,8 +244,24 @@ export default function HomePage() {
 
           {/* Feed Content */}
           {feedLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-              <CircularProgress size={60} thickness={4} />
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center',
+              justifyContent: 'center', 
+              py: 8 
+            }}>
+              <CircularProgress 
+                size={60} 
+                thickness={4}
+                sx={{ 
+                  color: 'primary.main',
+                  mb: 3
+                }} 
+              />
+              <Typography variant="h6" color="text.secondary" fontWeight={500}>
+                Loading your feed...
+              </Typography>
             </Box>
           ) : posts.length === 0 ? (
             <Fade in={true} timeout={500}>
@@ -205,10 +274,18 @@ export default function HomePage() {
                   border: '1px solid',
                   borderColor: 'divider',
                   backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.8)',
-                  backdropFilter: 'blur(20px)'
+                  backdropFilter: 'blur(20px)',
+                  backgroundImage: 'radial-gradient(at 30% 20%, rgba(155, 39, 176, 0.05) 0px, transparent 50%)',
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
                 }}
               >
                 <Box sx={{ maxWidth: 400, mx: 'auto' }}>
+                  <Box sx={{ mb: 3 }}>
+                    {activeTab === 0 ? 
+                      <img src="/empty-feed.svg" alt="Empty feed" width={180} height={180} /> : 
+                      <img src="/explore.svg" alt="Explore" width={180} height={180} />
+                    }
+                  </Box>
                   <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
                     {activeTab === 0 ? "Your feed is empty" : "No posts to discover"}
                   </Typography>
@@ -222,13 +299,17 @@ export default function HomePage() {
                     size="large"
                     disableElevation
                     sx={{ 
-                      borderRadius: 3, 
+                      borderRadius: 10, 
                       px: 4, 
                       py: 1.5,
                       mt: 2,
                       fontWeight: 600,
                       textTransform: 'none',
-                      boxShadow: '0 4px 14px rgba(0,0,0,0.1)'
+                      background: 'linear-gradient(45deg, #6a1b9a 30%, #9c27b0 90%)',
+                      boxShadow: '0 4px 12px rgba(106, 27, 154, 0.25)',
+                      '&:hover': {
+                        boxShadow: '0 6px 18px rgba(106, 27, 154, 0.3)',
+                      }
                     }}
                     onClick={() => activeTab === 0 ? setCreatePostOpen(true) : navigate('/explore')}
                   >
@@ -258,11 +339,13 @@ export default function HomePage() {
               elevation={0}
               sx={{
                 p: 0.5,
-                borderRadius: 3,
+                borderRadius: 10,
                 border: '1px solid',
                 borderColor: 'divider',
                 backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.8)',
-                backdropFilter: 'blur(20px)'
+                backdropFilter: 'blur(20px)',
+                backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
               }}
             >
               <TextField
@@ -273,7 +356,7 @@ export default function HomePage() {
                 InputProps={{
                   startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />,
                   sx: {
-                    borderRadius: 3,
+                    borderRadius: 10,
                     '& .MuiOutlinedInput-notchedOutline': {
                       border: 'none'
                     }
@@ -292,7 +375,9 @@ export default function HomePage() {
                 borderColor: 'divider',
                 boxShadow: 'none',
                 backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.8)',
-                backdropFilter: 'blur(20px)'
+                backdropFilter: 'blur(20px)',
+                backgroundImage: 'radial-gradient(at 70% 20%, rgba(106, 27, 154, 0.05) 0px, transparent 50%)',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
               }} 
             />
 
@@ -305,7 +390,9 @@ export default function HomePage() {
                 border: '1px solid',
                 borderColor: 'divider',
                 backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.8)',
-                backdropFilter: 'blur(20px)'
+                backdropFilter: 'blur(20px)',
+                backgroundImage: 'radial-gradient(at 100% 80%, rgba(106, 27, 154, 0.05) 0px, transparent 50%)',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2.5 }}>
@@ -320,8 +407,10 @@ export default function HomePage() {
                     sx={{
                       color: 'primary.main',
                       backgroundColor: 'action.selected',
+                      transition: 'all 0.2s ease',
                       '&:hover': {
-                        backgroundColor: 'action.hover'
+                        backgroundColor: 'action.hover',
+                        transform: 'scale(1.1)'
                       }
                     }}
                   >
@@ -339,9 +428,19 @@ export default function HomePage() {
                   </Fade>
                 ))}
                 {!suggestedUsersData?.data?.length && (
-                  <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
-                    No suggestions available
-                  </Typography>
+                  <Box sx={{ 
+                    textAlign: 'center', 
+                    py: 3, 
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 1
+                  }}>
+                    <img src="/no-suggestions.svg" alt="No suggestions" width={80} height={80} />
+                    <Typography variant="body2" color="text.secondary">
+                      No suggestions available
+                    </Typography>
+                  </Box>
                 )}
               </Box>
             </Paper>
@@ -355,16 +454,48 @@ export default function HomePage() {
               pt: 2,
               opacity: 0.7
             }}>
-              <Typography variant="caption" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+              <Typography 
+                variant="caption" 
+                color="text.secondary" 
+                sx={{ 
+                  cursor: 'pointer', 
+                  transition: 'color 0.2s',
+                  '&:hover': { color: 'primary.main' } 
+                }}
+              >
                 About
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+              <Typography 
+                variant="caption" 
+                color="text.secondary" 
+                sx={{ 
+                  cursor: 'pointer', 
+                  transition: 'color 0.2s',
+                  '&:hover': { color: 'primary.main' } 
+                }}
+              >
                 Privacy
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+              <Typography 
+                variant="caption" 
+                color="text.secondary" 
+                sx={{ 
+                  cursor: 'pointer', 
+                  transition: 'color 0.2s',
+                  '&:hover': { color: 'primary.main' } 
+                }}
+              >
                 Terms
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+              <Typography 
+                variant="caption" 
+                color="text.secondary" 
+                sx={{ 
+                  cursor: 'pointer', 
+                  transition: 'color 0.2s',
+                  '&:hover': { color: 'primary.main' } 
+                }}
+              >
                 Help
               </Typography>
             </Box>

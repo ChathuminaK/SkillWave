@@ -52,7 +52,6 @@ export default function Layout() {
 
   const handleNotificationsOpen = (event) => {
     setNotificationsAnchor(event.currentTarget);
-    // Refetch notifications when opened
     queryClient.invalidateQueries(['notifications']);
   };
 
@@ -65,13 +64,13 @@ export default function Layout() {
     handleProfileMenuClose();
     navigate('/login');
   };
-  
+
   const { data: unreadCount } = useQuery(
     ['unreadNotifications'], 
     () => notificationApi.getUnreadCount(),
     { 
       enabled: isAuthenticated,
-      refetchInterval: 30000, // Refresh every 30 seconds
+      refetchInterval: 30000,
     }
   );
 
@@ -81,24 +80,16 @@ export default function Layout() {
     {
       enabled: isAuthenticated && Boolean(notificationsAnchor),
       onSuccess: () => {
-        // Invalidate unread count after getting notifications
         queryClient.invalidateQueries(['unreadNotifications']);
       }
     }
   );
 
   const handleNotificationClick = async (notification) => {
-    // Mark notification as read
     await notificationApi.markAsRead(notification.id);
-    
-    // Invalidate queries to refresh data
     queryClient.invalidateQueries(['notifications']);
     queryClient.invalidateQueries(['unreadNotifications']);
-    
-    // Close notifications menu
     handleNotificationsClose();
-    
-    // Navigate based on notification type
     switch(notification.type) {
       case 'COMMENT':
       case 'LIKE':
@@ -108,7 +99,6 @@ export default function Layout() {
         navigate(`/profile/${notification.senderId}`);
         break;
       case 'LEARNING_UPDATE':
-        // Assuming this redirects to the learning progress
         navigate(`/learning-progress/${notification.entityId}`);
         break;
       default:
@@ -168,8 +158,7 @@ export default function Layout() {
       </List>
     </Box>
   );
-  
-  // Function to render notification icon based on type
+
   const getNotificationIcon = (type) => {
     switch(type) {
       case 'COMMENT':
@@ -185,7 +174,17 @@ export default function Layout() {
 
   return (
     <>
-      <AppBar position="sticky">
+      <AppBar 
+        position="sticky" 
+        elevation={0}
+        sx={{
+          backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          color: 'text.primary',
+        }}
+      >
         <Toolbar>
           {isMobile && (
             <IconButton
@@ -204,21 +203,32 @@ export default function Layout() {
             sx={{ 
               flexGrow: 1, 
               cursor: 'pointer',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              background: 'linear-gradient(45deg, #6a1b9a 30%, #9c27b0 90%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontSize: { xs: '1.2rem', sm: '1.5rem' }
             }}
             onClick={() => navigate('/')}
           >
-            SkillShare
+            SkillWave
           </Typography>
           
-
           {isAuthenticated ? (
             <>
               <Tooltip title="Create Post">
                 <IconButton 
-                  color="inherit" 
                   onClick={() => navigate('/create-post')}
-                  sx={{ mr: 1 }}
+                  sx={{ 
+                    mr: 1,
+                    backgroundColor: 'rgba(106, 27, 154, 0.1)',
+                    color: 'primary.main',
+                    '&:hover': {
+                      backgroundColor: 'rgba(106, 27, 154, 0.2)',
+                      transform: 'scale(1.05)'
+                    },
+                    transition: 'all 0.2s ease'
+                  }}
                 >
                   <CreateIcon />
                 </IconButton>
@@ -226,11 +236,29 @@ export default function Layout() {
               
               <Tooltip title="Notifications">
                 <IconButton 
-                  color="inherit" 
-                  sx={{ mr: 1 }}
+                  sx={{ 
+                    mr: 1,
+                    backgroundColor: 'rgba(106, 27, 154, 0.1)',
+                    color: 'primary.main',
+                    '&:hover': {
+                      backgroundColor: 'rgba(106, 27, 154, 0.2)',
+                      transform: 'scale(1.05)'
+                    },
+                    transition: 'all 0.2s ease'
+                  }}
                   onClick={handleNotificationsOpen}
                 >
-                  <Badge badgeContent={unreadCount?.data || 0} color="error">
+                  <Badge 
+                    badgeContent={unreadCount?.data || 0} 
+                    color="error"
+                    sx={{ 
+                      '& .MuiBadge-badge': {
+                        backgroundColor: '#f50057',
+                        color: 'white',
+                        boxShadow: '0 0 0 2px #fff'
+                      }
+                    }}
+                  >
                     <NotificationsIcon />
                   </Badge>
                 </IconButton>
@@ -248,15 +276,33 @@ export default function Layout() {
                   vertical: 'top',
                   horizontal: 'right',
                 }}
+                PaperProps={{
+                  elevation: 4,
+                  sx: { borderRadius: 2, width: { xs: '100%', sm: 360 }, maxWidth: '95vw' }
+                }}
               >
-                <Paper sx={{ width: 320, maxHeight: 400, overflow: 'auto' }}>
-                  <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="h6">Notifications</Typography>
-                    <Button size="small" onClick={handleMarkAllAsRead}>
+                <Paper sx={{ width: '100%', maxHeight: 400, overflow: 'auto' }}>
+                  <Box sx={{ 
+                    p: 2,
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    position: 'sticky',
+                    top: 0,
+                    backgroundColor: 'background.paper',
+                    zIndex: 1
+                  }}>
+                    <Typography variant="h6" fontWeight="bold">Notifications</Typography>
+                    <Button 
+                      size="small" 
+                      onClick={handleMarkAllAsRead}
+                      sx={{ textTransform: 'none', fontWeight: 500 }}
+                    >
                       Mark All as Read
                     </Button>
                   </Box>
-                  <Divider />
                   <List sx={{ py: 0 }}>
                     {notifications?.data?.content?.length > 0 ? (
                       notifications.data.content.map((notification) => (
@@ -265,11 +311,19 @@ export default function Layout() {
                           button 
                           onClick={() => handleNotificationClick(notification)}
                           sx={{
-                            bgcolor: notification.read ? 'transparent' : 'action.hover',
+                            transition: 'background-color 0.2s ease',
+                            bgcolor: notification.read ? 'transparent' : 'rgba(106, 27, 154, 0.05)',
+                            borderLeft: notification.read ? 'none' : '3px solid',
+                            borderLeftColor: 'primary.main',
+                            '&:hover': {
+                              bgcolor: 'rgba(106, 27, 154, 0.1)'
+                            }
                           }}
                         >
                           <ListItemAvatar>
-                            <Avatar>
+                            <Avatar sx={{ 
+                              bgcolor: notification.read ? 'action.selected' : 'primary.light',
+                            }}>
                               {getNotificationIcon(notification.type)}
                             </Avatar>
                           </ListItemAvatar>
@@ -281,7 +335,14 @@ export default function Layout() {
                       ))
                     ) : (
                       <ListItem>
-                        <ListItemText primary="No notifications" />
+                        <ListItemText 
+                          primary="No notifications"
+                          primaryTypographyProps={{ 
+                            color: 'text.secondary', 
+                            align: 'center',
+                            py: 3
+                          }}
+                        />
                       </ListItem>
                     )}
                   </List>
@@ -293,6 +354,16 @@ export default function Layout() {
                   onClick={handleProfileMenuOpen}
                   size="small"
                   edge="end"
+                  sx={{
+                    ml: 0.5,
+                    border: '2px solid',
+                    borderColor: 'primary.light',
+                    p: 0.25,
+                    transition: 'transform 0.2s ease',
+                    '&:hover': {
+                      transform: 'scale(1.05)'
+                    }
+                  }}
                 >
                   <Avatar 
                     alt={currentUser?.name}
@@ -308,11 +379,20 @@ export default function Layout() {
                 onClose={handleProfileMenuClose}
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                PaperProps={{
+                  elevation: 3,
+                  sx: { minWidth: 200, mt: 1.5, borderRadius: 2 }
+                }}
               >
+                <Box sx={{ py: 1, px: 2, mb: 1 }}>
+                  <Typography variant="subtitle2" noWrap>{currentUser?.name}</Typography>
+                  <Typography variant="caption" color="text.secondary" noWrap>@{currentUser?.username}</Typography>
+                </Box>
+                <Divider />
                 <MenuItem onClick={() => {
                   handleProfileMenuClose();
                   navigate(`/profile/${currentUser.id}`);
-                }}>
+                }} sx={{ py: 1.5 }}>
                   <ListItemIcon>
                     <AccountIcon fontSize="small" />
                   </ListItemIcon>
@@ -321,34 +401,46 @@ export default function Layout() {
                 <MenuItem onClick={() => {
                   handleProfileMenuClose();
                   navigate('/edit-profile');
-                }}>
+                }} sx={{ py: 1.5 }}>
                   <ListItemIcon>
                     <CreateIcon fontSize="small" />
                   </ListItemIcon>
                   Edit Profile
                 </MenuItem>
                 <Divider />
-                <MenuItem onClick={handleLogout}>
+                <MenuItem onClick={handleLogout} sx={{ py: 1.5 }}>
                   <ListItemIcon>
-                    <LogoutIcon fontSize="small" />
+                    <LogoutIcon fontSize="small" sx={{ color: 'error.main' }} />
                   </ListItemIcon>
-                  Logout
+                  <Typography color="error">Logout</Typography>
                 </MenuItem>
               </Menu>
             </>
           ) : (
             <Box>
               <Button 
-                color="inherit" 
+                color="primary" 
                 onClick={() => navigate('/login')}
-                sx={{ mr: 1 }}
+                sx={{ 
+                  mr: 1,
+                  fontWeight: 500,
+                  borderRadius: 6,
+                  px: 2.5
+                }}
               >
                 Login
               </Button>
               <Button 
                 variant="contained" 
-                color="secondary" 
+                color="primary" 
                 onClick={() => navigate('/register')}
+                sx={{
+                  fontWeight: 500,
+                  borderRadius: 6,
+                  px: 2.5,
+                  background: 'linear-gradient(45deg, #6a1b9a 30%, #9c27b0 90%)',
+                  boxShadow: '0 4px 10px rgba(106, 27, 154, 0.3)'
+                }}
               >
                 Register
               </Button>
@@ -362,24 +454,37 @@ export default function Layout() {
         open={drawerOpen}
         onClose={handleDrawerToggle}
         ModalProps={{
-          keepMounted: true, // Better mobile performance
+          keepMounted: true,
         }}
         sx={{
           display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { width: 250 },
+          '& .MuiDrawer-paper': { width: 280, borderRadius: '0 16px 16px 0' },
         }}
       >
         {drawer}
       </Drawer>
 
-      <Container component="main" sx={{ py: 3, flexGrow: 1 }}>
+      <Container component="main" sx={{ py: 4, flexGrow: 1 }}>
         <Outlet />
       </Container>
 
-      <Box component="footer" sx={{ py: 3, bgcolor: 'background.paper', textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary">
-          © {new Date().getFullYear()} SkillShare - Connect, Learn, Grow
-        </Typography>
+      <Box 
+        component="footer" 
+        sx={{ 
+          py: 4,
+          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+          backdropFilter: 'blur(10px)',
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          mt: 'auto',
+          textAlign: 'center'
+        }}
+      >
+        <Container maxWidth="lg">
+          <Typography variant="body2" color="text.secondary">
+            © {new Date().getFullYear()} SkillWave - Connect, Learn, Grow
+          </Typography>
+        </Container>
       </Box>
     </>
   );

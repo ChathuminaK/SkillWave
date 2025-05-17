@@ -2,7 +2,7 @@ import { useState, useContext, useEffect } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   Container, Box, Typography, TextField, Button,
-  Link, Paper, Divider, CircularProgress,
+  Link, Paper, CircularProgress,
   IconButton, InputAdornment
 } from '@mui/material';
 import {
@@ -85,28 +85,47 @@ export default function LoginPage() {
 
   return (
     <Container
-    maxWidth="sm"
-    sx={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundImage: `url('/e6272498-5b0f-4960-b3b2-fc5b97e0094a.png')`,
-      backgroundSize: 'cover',
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center',
-      backgroundAttachment: 'fixed',
-      py: 4,
-    }}
+      maxWidth="sm"
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundImage: `url('/e6272498-5b0f-4960-b3b2-fc5b97e0094a.png')`,
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        py: 4,
+      }}
     >
       <Paper
-        elevation={6}
+        elevation={16}
         sx={{
-          p: 5,
+          p: { xs: 3, sm: 5 },
           borderRadius: 4,
           width: '100%',
-          background: 'linear-gradient(145deg, #ffffff, #f8f8ff)',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+          background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 248, 255, 0.85))',
+          backdropFilter: 'blur(10px)',
+          boxShadow: '0 25px 50px rgba(0,0,0,0.15)',
+          overflow: 'hidden',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '5px',
+            background: 'linear-gradient(90deg, #6a1b9a, #9c27b0, #6a1b9a)',
+            backgroundSize: '200% 100%',
+            animation: 'gradient-animation 3s ease infinite',
+          },
+          '@keyframes gradient-animation': {
+            '0%': { backgroundPosition: '0% 50%' },
+            '50%': { backgroundPosition: '100% 50%' },
+            '100%': { backgroundPosition: '0% 50%' },
+          }
         }}
       >
         <Typography
@@ -116,6 +135,11 @@ export default function LoginPage() {
             fontWeight: 700,
             mb: 2,
             textAlign: 'center',
+            fontSize: { xs: '1.75rem', sm: '2.125rem' },
+            backgroundImage: 'linear-gradient(45deg, #6a1b9a, #9c27b0)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textShadow: '0 2px 4px rgba(106, 27, 154, 0.1)',
           }}
         >
           Welcome Back!
@@ -126,13 +150,21 @@ export default function LoginPage() {
           sx={{
             textAlign: 'center',
             color: '#555',
-            mb: 3,
+            mb: 4,
           }}
         >
           Sign in to continue to your dashboard
         </Typography>
 
-        <Box component="form" onSubmit={formik.handleSubmit}>
+        <Box 
+          component="form" 
+          onSubmit={formik.handleSubmit}
+          sx={{ 
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2.5
+          }}
+        >
           <TextField
             fullWidth
             label="Email"
@@ -142,8 +174,21 @@ export default function LoginPage() {
             onBlur={formik.handleBlur}
             error={formik.touched.email && Boolean(formik.errors.email)}
             helperText={formik.touched.email && formik.errors.email}
-            sx={{ mb: 2 }}
             variant="outlined"
+            InputProps={{
+              sx: { borderRadius: 3, bgcolor: 'rgba(255,255,255,0.6)' }
+            }}
+            sx={{
+              '& label.Mui-focused': {
+                color: '#6a1b9a',
+              },
+              '& .MuiOutlinedInput-root': {
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#6a1b9a',
+                  borderWidth: 2,
+                },
+              },
+            }}
           />
 
           <TextField
@@ -158,24 +203,46 @@ export default function LoginPage() {
             helperText={formik.touched.password && formik.errors.password}
             variant="outlined"
             InputProps={{
+              sx: { borderRadius: 3, bgcolor: 'rgba(255,255,255,0.6)' },
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                  <IconButton 
+                    onClick={() => setShowPassword(!showPassword)} 
+                    edge="end"
+                    sx={{ color: '#6a1b9a' }}
+                  >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               )
             }}
+            sx={{
+              '& label.Mui-focused': {
+                color: '#6a1b9a',
+              },
+              '& .MuiOutlinedInput-root': {
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#6a1b9a',
+                  borderWidth: 2,
+                },
+              },
+            }}
           />
 
-          <Box sx={{ textAlign: 'right', mt: 1 }}>
+          <Box sx={{ textAlign: 'right' }}>
             <Link
               component={RouterLink}
               to="/forgot-password"
               sx={{
                 color: '#6a1b9a',
                 fontWeight: 500,
-                '&:hover': { textDecoration: 'underline', color: '#8e24aa' },
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+                '&:hover': { 
+                  textDecoration: 'underline', 
+                  color: '#8e24aa',
+                  transform: 'translateY(-1px)'
+                },
               }}
             >
               Forgot password?
@@ -188,17 +255,40 @@ export default function LoginPage() {
             variant="contained"
             disabled={isLoading}
             sx={{
-              mt: 3,
+              mt: 1,
               py: 1.5,
+              borderRadius: 6,
               fontWeight: 600,
+              fontSize: '1rem',
               backgroundColor: '#6a1b9a',
-              '&:hover': { backgroundColor: '#7b1fa2' },
+              backgroundImage: 'linear-gradient(45deg, #6a1b9a 30%, #9c27b0 90%)',
+              boxShadow: '0 4px 20px rgba(106, 27, 154, 0.25)',
+              transition: 'all 0.3s ease',
+              '&:hover': { 
+                backgroundColor: '#7b1fa2',
+                boxShadow: '0 6px 25px rgba(106, 27, 154, 0.35)',
+                transform: 'translateY(-2px)'
+              },
             }}
           >
-            {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
+            {isLoading ? 
+              <CircularProgress size={24} color="inherit" /> : 
+              'Sign In'
+            }
           </Button>
 
-          <Divider sx={{ my: 3 }}>or continue with</Divider>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            my: 2,
+            opacity: 0.7
+          }}>
+            <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
+            <Typography variant="body2" color="text.secondary" sx={{ px: 2 }}>
+              or continue with
+            </Typography>
+            <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
+          </Box>
 
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button
@@ -208,9 +298,18 @@ export default function LoginPage() {
               onClick={() => handleOAuthLogin('google')}
               sx={{
                 py: 1.5,
+                borderRadius: 6,
                 fontWeight: 600,
                 borderColor: '#dadce0',
-                '&:hover': { backgroundColor: '#f1f3f4' },
+                color: '#757575',
+                backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                transition: 'all 0.2s ease',
+                '&:hover': { 
+                  backgroundColor: '#f1f3f4',
+                  borderColor: '#bdbdbd',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 10px rgba(0, 0, 0, 0.08)'
+                },
               }}
             >
               Google
@@ -223,24 +322,56 @@ export default function LoginPage() {
               onClick={() => handleOAuthLogin('github')}
               sx={{
                 py: 1.5,
+                borderRadius: 6,
                 fontWeight: 600,
                 backgroundColor: '#24292e',
-                '&:hover': { backgroundColor: '#1b1f23' },
+                transition: 'all 0.2s ease',
+                '&:hover': { 
+                  backgroundColor: '#1b1f23',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)'
+                },
               }}
             >
               GitHub
             </Button>
           </Box>
 
-          <Typography sx={{ textAlign: 'center', mt: 3 }}>
+          <Typography 
+            sx={{ 
+              textAlign: 'center', 
+              mt: 3,
+              fontSize: '0.95rem'
+            }}
+          >
             Don't have an account?{' '}
             <Link
               component={RouterLink}
               to="/register"
               sx={{
-                color: '#1976d2',
+                color: '#6a1b9a',
                 fontWeight: 600,
-                '&:hover': { color: '#0d47a1' },
+                textDecoration: 'none',
+                position: 'relative',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  width: '100%',
+                  height: '2px',
+                  bottom: -2,
+                  left: 0,
+                  backgroundColor: '#6a1b9a',
+                  transform: 'scaleX(0)',
+                  transformOrigin: 'bottom right',
+                  transition: 'transform 0.3s ease',
+                },
+                '&:hover': { 
+                  color: '#9c27b0',
+                  '&::after': {
+                    transform: 'scaleX(1)',
+                    transformOrigin: 'bottom left',
+                  }
+                },
               }}
             >
               Register
