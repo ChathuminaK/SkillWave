@@ -18,6 +18,7 @@ import {
   Divider,
   useMediaQuery,
   useTheme,
+  Tooltip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -27,15 +28,19 @@ import {
   Person as PersonIcon,
   BookmarkBorder as BookmarkIcon,
   ExitToApp as LogoutIcon,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon,
 } from '@mui/icons-material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import { ThemeContext } from '../contexts/ThemeContext';
 import { notificationApi } from '../services/api';
 import { useQuery } from 'react-query';
 import { getFullImageUrl } from '../utils/imageUtils';
 
 export default function Header() {
   const { isAuthenticated, currentUser, logout } = useContext(AuthContext);
+  const { darkMode, toggleDarkMode } = useContext(ThemeContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
@@ -103,6 +108,12 @@ export default function Header() {
             <ListItemText primary={item.text} />
           </ListItem>
         ))}
+        <ListItem button onClick={toggleDarkMode}>
+          <ListItemIcon sx={{ color: '#00fffb' }}>
+            {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+          </ListItemIcon>
+          <ListItemText primary={darkMode ? "Light Mode" : "Dark Mode"} />
+        </ListItem>
         {isAuthenticated && (
           <ListItem button onClick={handleLogout}>
             <ListItemIcon sx={{ color: '#00fffb' }}><LogoutIcon /></ListItemIcon>
@@ -115,7 +126,10 @@ export default function Header() {
 
   return (
     <>
-      <AppBar position="static" sx={{ backgroundColor: '#ffbb00' }}>
+      <AppBar position="static" sx={{ 
+        backgroundColor: darkMode ? '#1a1a1a' : '#ffbb00',
+        color: darkMode ? 'white' : 'black'
+      }}>
         <Toolbar>
           {isAuthenticated && (
             <IconButton
@@ -136,7 +150,7 @@ export default function Header() {
             sx={{
               flexGrow: 1,
               textDecoration: 'none',
-              color: 'black',
+              color: 'inherit',
               fontWeight: 'bold',
             }}
           >
@@ -153,11 +167,11 @@ export default function Header() {
                       component={RouterLink}
                       to={item.path}
                       sx={{
-                        color: 'black',
+                        color: 'inherit',
                         mx: 0.5,
                         '&:hover': {
-                          backgroundColor: '#00fffb',
-                          color: 'black',
+                          backgroundColor: darkMode ? '#333' : '#00fffb',
+                          color: darkMode ? 'white' : 'black',
                         },
                       }}
                     >
@@ -166,6 +180,16 @@ export default function Header() {
                   ))}
                 </Box>
               )}
+
+              <Tooltip title="Toggle theme">
+                <IconButton 
+                  color="inherit" 
+                  onClick={toggleDarkMode}
+                  sx={{ ml: 1 }}
+                >
+                  {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+                </IconButton>
+              </Tooltip>
 
               <IconButton
                 color="inherit"
@@ -176,12 +200,12 @@ export default function Header() {
                   badgeContent={unreadCount?.data || 0}
                   sx={{
                     '& .MuiBadge-badge': {
-                      backgroundColor: '#00fffb',
+                      backgroundColor: darkMode ? '#00fffb' : '#00fffb',
                       color: 'black',
                     },
                   }}
                 >
-                  <NotificationsIcon sx={{ color: 'black' }} />
+                  <NotificationsIcon sx={{ color: 'inherit' }} />
                 </Badge>
               </IconButton>
 
@@ -214,6 +238,12 @@ export default function Header() {
                 }}
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
+                PaperProps={{
+                  sx: {
+                    bgcolor: darkMode ? '#333' : '#fff',
+                    color: darkMode ? '#fff' : 'inherit'
+                  }
+                }}
               >
                 <MenuItem onClick={() => { handleMenuClose(); navigate(`/profile/${currentUser.id}`); }}>
                   Profile
@@ -225,14 +255,14 @@ export default function Header() {
               </Menu>
             </Box>
           ) : (
-            <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Button
                 component={RouterLink}
                 to="/login"
                 sx={{
-                  color: 'black',
+                  color: 'inherit',
                   '&:hover': {
-                    backgroundColor: '#00fffb',
+                    backgroundColor: darkMode ? '#333' : '#00fffb',
                   }
                 }}
               >
@@ -242,14 +272,23 @@ export default function Header() {
                 component={RouterLink}
                 to="/register"
                 sx={{
-                  color: 'black',
+                  color: 'inherit',
                   '&:hover': {
-                    backgroundColor: '#00fffb',
+                    backgroundColor: darkMode ? '#333' : '#00fffb',
                   }
                 }}
               >
                 Register
               </Button>
+              <Tooltip title="Toggle theme">
+                <IconButton 
+                  color="inherit" 
+                  onClick={toggleDarkMode}
+                  sx={{ ml: 1 }}
+                >
+                  {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+                </IconButton>
+              </Tooltip>
             </Box>
           )}
         </Toolbar>
@@ -262,7 +301,12 @@ export default function Header() {
         ModalProps={{ keepMounted: true }}
         sx={{
           display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 250 },
+          '& .MuiDrawer-paper': { 
+            boxSizing: 'border-box', 
+            width: 250,
+            bgcolor: darkMode ? '#222' : '#fff',
+            color: darkMode ? '#fff' : 'inherit'
+          },
         }}
       >
         {drawer}

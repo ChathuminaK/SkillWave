@@ -246,6 +246,9 @@ export const learningProgressApi = {
     return api.put(`/learning-progress/${progressId}`, formattedData);
   },
   
+  updateProgressPercentage: (progressId, percentage) => 
+    api.put(`/learning-progress/${progressId}/completion`, { completionPercentage: percentage }),
+  
   getProgress: (progressId) => api.get(`/learning-progress/${progressId}`),
   
   deleteProgress: (progressId) => api.delete(`/learning-progress/${progressId}`),
@@ -253,6 +256,12 @@ export const learningProgressApi = {
   getUserProgress: (userId) => api.get(`/learning-progress/user/${userId}`),
   
   getProgressBySkill: (skill) => api.get(`/learning-progress/skill/${skill}`),
+
+  getSavedProgress: () => api.get('/learning-progress/saved'),
+  
+  saveProgress: (progressId) => api.post(`/learning-progress/${progressId}/save`),
+  
+  unsaveProgress: (progressId) => api.delete(`/learning-progress/${progressId}/save`),
 };
 
 

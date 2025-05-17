@@ -540,81 +540,12 @@ export default function ProfilePage() {
           <Grid container spacing={3}>
             {Array.isArray(learningProgress) ? learningProgress.map((progress) => (
               <Grid item xs={12} md={6} lg={4} key={progress.id}>
-                <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <CardHeader
-                    action={isOwnProfile && (
-                      <IconButton aria-label="settings">
-                        <MoreIcon />
-                      </IconButton>
-                    )}
-                    title={
-                      <Typography variant="h6" sx={{ pr: 6 }}>
-                        {progress.title}
-                      </Typography>
-                    }
-                    subheader={
-                      <Typography color="text.secondary" variant="body2">
-                        {progress.type} • {progress.startDate && new Date(progress.startDate).toLocaleDateString()}
-                        {progress.completionDate && ` → ${new Date(progress.completionDate).toLocaleDateString()}`}
-                      </Typography>
-                    }
-                  />
-                  
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    {progress.description && (
-                      <Typography variant="body2" paragraph>
-                        {progress.description}
-                      </Typography>
-                    )}
-                    
-                    <Box sx={{ my: 2 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                        <Typography variant="body2">Completion</Typography>
-                        <Typography variant="body2" fontWeight="bold">
-                          {progress.completionPercentage || 0}%
-                        </Typography>
-                      </Box>
-                      <ProgressBar>
-                        <ProgressFill sx={{ width: `${progress.completionPercentage || 0}%` }} />
-                      </ProgressBar>
-                    </Box>
-                    
-                    {progress.skills?.length > 0 && (
-                      <Box sx={{ mt: 2, mb: 1 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          Skills Gained
-                        </Typography>
-                        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', mt: 1 }}>
-                          {progress.skills.map(skill => (
-                            <Chip
-                              key={skill}
-                              label={skill}
-                              size="small"
-                              variant="outlined"
-                              onClick={() => navigate(`/explore?skill=${encodeURIComponent(skill)}`)}
-                            />
-                          ))}
-                        </Stack>
-                      </Box>
-                    )}
-                  </CardContent>
-                  
-                  {progress.resourceUrl && (
-                    <Box sx={{ px: 2, pb: 2 }}>
-                      <Button 
-                        variant="text" 
-                        size="small" 
-                        href={progress.resourceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        startIcon={<LinkIcon />}
-                        sx={{ borderRadius: 2 }}
-                      >
-                        View Resource
-                      </Button>
-                    </Box>
-                  )}
-                </Card>
+                <LearningProgressCard 
+                  progress={progress} 
+                  isOwner={isOwnProfile} 
+                  onEdit={handleEditProgress} 
+                  onDelete={handleDeleteProgress}
+                />
               </Grid>
             )) : (
               <Grid item xs={12}>

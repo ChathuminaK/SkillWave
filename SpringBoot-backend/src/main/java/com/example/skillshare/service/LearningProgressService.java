@@ -2,8 +2,10 @@ package com.example.skillshare.service;
 
 import com.example.skillshare.dto.LearningProgressDto;
 import com.example.skillshare.model.LearningProgress;
+import com.example.skillshare.model.Notification;
 import com.example.skillshare.model.User;
 import com.example.skillshare.repository.LearningProgressRepository;
+import com.example.skillshare.repository.NotificationRepository;
 import com.example.skillshare.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,11 +20,19 @@ import java.util.UUID;
 @Service
 public class LearningProgressService {
 
-    @Autowired
-    private LearningProgressRepository learningProgressRepository;
+    private final LearningProgressRepository learningProgressRepository;
+    private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    public LearningProgressService(
+            LearningProgressRepository learningProgressRepository,
+            UserRepository userRepository,
+            NotificationRepository notificationRepository) {
+        this.learningProgressRepository = learningProgressRepository;
+        this.userRepository = userRepository;
+        this.notificationRepository = notificationRepository;
+    }
 
     public LearningProgress createLearningProgress(String email, LearningProgressDto progressDto) {
         User user = userRepository.findByEmail(email)
@@ -59,7 +69,15 @@ public class LearningProgressService {
         progress.setCreatedAt(new Date());
         progress.setUpdatedAt(new Date());
 
-        return learningProgressRepository.save(progress);
+        LearningProgress savedProgress = learningProgressRepository.save(progress);
+
+        // Create notification for followers if completion is significant
+        if (progress.getCompletionPercentage() != null &&
+            (progress.getCompletionPercentage() == 100 || progress.getCompletionPercentage() % 25 == 0)) {
+            createLearningUpdateNotification(user, savedProgress);
+        }
+
+        return savedProgress;
     }
 
     public LearningProgress updateLearningProgress(String email, String progressId, LearningProgressDto progressDto) {
@@ -93,12 +111,23 @@ public class LearningProgressService {
         }
 
         progress.setResourceUrl(progressDto.getResourceUrl());
+
+        int oldCompletion = progress.getCompletionPercentage() != null ? progress.getCompletionPercentage() : 0;
         progress.setCompletionPercentage(progressDto.getCompletionPercentage());
+
         progress.setStartDate(progressDto.getStartDate());
         progress.setCompletionDate(progressDto.getCompletionDate());
         progress.setUpdatedAt(new Date());
 
-        return learningProgressRepository.save(progress);
+        LearningProgress updatedProgress = learningProgressRepository.save(progress);
+
+        // Create notification for followers if significant progress is made
+        int newCompletion = progressDto.getCompletionPercentage() != null ? progressDto.getCompletionPercentage() : 0;
+        if (newCompletion > oldCompletion && (newCompletion == 100 || newCompletion % 25 == 0)) {
+            createLearningUpdateNotification(user, updatedProgress);
+        }
+
+        return updatedProgress;
     }
 
     public void deleteLearningProgress(String email, String progressId) {
@@ -168,5 +197,29 @@ public class LearningProgressService {
         });
 
         return progressPage;
+    }
+
+    private void createLearningUpdateNotification(User user, LearningProgress learningProgress) {
+        if (user.getFollowers() == null || user.getFollowers().isEmpty()) {
+            return;
+        }
+
+        for (String followerId : user.getFollowers()) {
+            Notification notification = new Notification();
+            notification.setUserId(followerId);
+            notification.setSenderId(user.getId());
+            notification.setType("LEARNING_UPDATE");
+
+            String progressMessage = learningProgress.getCompletionPercentage() == 100
+                    ? "completed"
+                    : "reached " + learningProgress.getCompletionPercentage() + "% progress on";
+
+            notification
+                    .setContent(user.getName() + " " + progressMessage + " learning item: " + learningProgress.getTitle());
+            notification.setEntityId(learningProgress.getId());
+            notification.setCreatedAt(new Date());
+
+            notificationRepository.save(notification);
+        }
     }
 }

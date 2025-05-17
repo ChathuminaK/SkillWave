@@ -55,8 +55,14 @@ const CreateProgressDialog = ({ open, onClose, progressToEdit = null, userId }) 
   const createMutation = useMutation(
     (data) => learningProgressApi.createProgress(data),
     {
-      onSuccess: () => {
+      onSuccess: (response) => {
+        // Update all related queries
         queryClient.invalidateQueries(['userProgress', userId]);
+        queryClient.invalidateQueries(['learningProgressById']);
+        queryClient.invalidateQueries(['notifications']);
+        
+        // Show success message or toast here if needed
+        
         onClose();
         setIsSubmitting(false);
       },
@@ -70,8 +76,12 @@ const CreateProgressDialog = ({ open, onClose, progressToEdit = null, userId }) 
   const updateMutation = useMutation(
     ({ id, data }) => learningProgressApi.updateProgress(id, data),
     {
-      onSuccess: () => {
+      onSuccess: (response) => {
+        // Update all related queries
         queryClient.invalidateQueries(['userProgress', userId]);
+        queryClient.invalidateQueries(['learningProgressById', progressToEdit?.id]);
+        queryClient.invalidateQueries(['notifications']);
+        
         onClose();
         setIsSubmitting(false);
       },

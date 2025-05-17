@@ -15,6 +15,8 @@ import * as Yup from 'yup';
 import Swal from 'sweetalert2';
 import 'sweetalert2/src/sweetalert2.scss';
 import { AuthContext } from '../contexts/AuthContext';
+import { ThemeContext } from '../contexts/ThemeContext';
+import ThemeToggler from '../components/ThemeToggler';
 
 // Custom Google Icon
 const GoogleIcon = () => (
@@ -28,6 +30,7 @@ const GoogleIcon = () => (
 
 export default function LoginPage() {
   const { login, isAuthenticated } = useContext(AuthContext);
+  const { darkMode } = useContext(ThemeContext);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -91,7 +94,9 @@ export default function LoginPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundImage: `url('/e6272498-5b0f-4960-b3b2-fc5b97e0094a.png')`,
+        backgroundImage: darkMode 
+          ? 'linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url("/login-bg-dark.jpg")'
+          : `url('/e6272498-5b0f-4960-b3b2-fc5b97e0094a.png')`,
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center',
@@ -105,9 +110,13 @@ export default function LoginPage() {
           p: { xs: 3, sm: 5 },
           borderRadius: 4,
           width: '100%',
-          background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 248, 255, 0.85))',
+          background: darkMode
+            ? 'linear-gradient(145deg, rgba(30, 30, 35, 0.8), rgba(20, 20, 25, 0.9))'
+            : 'linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 248, 255, 0.85))',
           backdropFilter: 'blur(10px)',
-          boxShadow: '0 25px 50px rgba(0,0,0,0.15)',
+          boxShadow: darkMode 
+            ? '0 25px 50px rgba(0,0,0,0.3)' 
+            : '0 25px 50px rgba(0,0,0,0.15)',
           overflow: 'hidden',
           position: 'relative',
           '&::before': {
@@ -128,6 +137,11 @@ export default function LoginPage() {
           }
         }}
       >
+        {/* Theme toggle button in corner */}
+        <Box sx={{ position: 'absolute', top: 10, right: 10 }}>
+          <ThemeToggler size="small" />
+        </Box>
+
         <Typography
           variant="h4"
           sx={{

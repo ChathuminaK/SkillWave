@@ -9,6 +9,8 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { AuthContext } from '../contexts/AuthContext';
+import { ThemeContext } from '../contexts/ThemeContext';
+import ThemeToggler from '../components/ThemeToggler';
 import Swal from 'sweetalert2';
 
 const validationSchema = [
@@ -35,6 +37,7 @@ const validationSchema = [
 
 export default function RegisterPage() {
   const { register } = useContext(AuthContext);
+  const { darkMode } = useContext(ThemeContext);
   const [activeStep, setActiveStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -282,7 +285,13 @@ export default function RegisterPage() {
         flexDirection: 'column', 
         alignItems: 'center',
         justifyContent: 'center', 
-        minHeight: '100vh' 
+        minHeight: '100vh',
+        backgroundImage: darkMode 
+          ? 'linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url("/register-bg-dark.jpg")'
+          : 'none',
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
       }}>
         <Paper 
           elevation={0} 
@@ -290,10 +299,22 @@ export default function RegisterPage() {
             p: 4, 
             width: '100%', 
             borderRadius: 1, 
-            border: '1px solid #e0e0e0',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
+            border: '1px solid',
+            borderColor: darkMode ? 'rgba(255,255,255,0.1)' : '#e0e0e0',
+            boxShadow: darkMode 
+              ? '0 2px 10px rgba(0,0,0,0.3)' 
+              : '0 2px 10px rgba(0,0,0,0.05)',
+            backgroundColor: darkMode 
+              ? 'rgba(30, 30, 35, 0.7)' 
+              : '#ffffff',
+            backdropFilter: 'blur(10px)',
           }}
         >
+          {/* Theme toggle button in corner */}
+          <Box sx={{ position: 'absolute', top: 10, right: 10 }}>
+            <ThemeToggler size="small" />
+          </Box>
+
           <Box sx={{ mb: 3, textAlign: 'center' }}>
             <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 500, color: '#6a1b9a' }}>
               {activeStep === 0 ? 'Create an Account' : 'Personal Details'}
@@ -401,7 +422,7 @@ export default function RegisterPage() {
           )}
 
           <Box sx={{ mt: 2, textAlign: 'center' }}>
-            <Typography variant="body2">
+            <Typography variant="body2" color={darkMode ? 'text.secondary' : 'initial'}>
               Already have an account?{' '}
               <Link 
                 component={RouterLink} 

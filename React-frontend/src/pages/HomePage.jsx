@@ -69,9 +69,15 @@ export default function HomePage() {
               borderRadius: 4,
               border: '1px solid',
               borderColor: 'divider',
-              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.8)',
+              backgroundColor: (theme) => 
+                theme.palette.mode === 'dark' 
+                  ? 'rgba(30, 30, 35, 0.7)' 
+                  : 'rgba(255, 255, 255, 0.9)',
               backdropFilter: 'blur(20px)',
-              backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))',
+              backgroundImage: (theme) => 
+                theme.palette.mode === 'dark'
+                  ? 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))'
+                  : 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))',
               boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
             }}
           >
@@ -172,9 +178,15 @@ export default function HomePage() {
               borderRadius: 4,
               border: '1px solid',
               borderColor: 'divider',
-              backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.8)',
+              backgroundColor: (theme) => 
+                theme.palette.mode === 'dark' 
+                  ? 'rgba(30, 30, 35, 0.7)' 
+                  : 'rgba(255, 255, 255, 0.9)',
               backdropFilter: 'blur(20px)',
-              backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))',
+              backgroundImage: (theme) => 
+                theme.palette.mode === 'dark'
+                  ? 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))'
+                  : 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))',
               boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
             }}
           >
@@ -273,9 +285,15 @@ export default function HomePage() {
                   borderRadius: 4,
                   border: '1px solid',
                   borderColor: 'divider',
-                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.8)',
+                  backgroundColor: (theme) => 
+                    theme.palette.mode === 'dark' 
+                      ? 'rgba(30, 30, 35, 0.7)' 
+                      : 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(20px)',
-                  backgroundImage: 'radial-gradient(at 30% 20%, rgba(155, 39, 176, 0.05) 0px, transparent 50%)',
+                  backgroundImage: (theme) => 
+                    theme.palette.mode === 'dark'
+                      ? 'radial-gradient(at 30% 20%, rgba(155, 39, 176, 0.15) 0px, transparent 50%)'
+                      : 'radial-gradient(at 30% 20%, rgba(155, 39, 176, 0.05) 0px, transparent 50%)',
                   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
                 }}
               >
@@ -342,9 +360,15 @@ export default function HomePage() {
                 borderRadius: 10,
                 border: '1px solid',
                 borderColor: 'divider',
-                backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.8)',
+                backgroundColor: (theme) => 
+                  theme.palette.mode === 'dark' 
+                    ? 'rgba(30, 30, 35, 0.7)' 
+                    : 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(20px)',
-                backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))',
+                backgroundImage: (theme) => 
+                  theme.palette.mode === 'dark'
+                    ? 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))'
+                    : 'linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))',
                 boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
               }}
             >
@@ -373,10 +397,15 @@ export default function HomePage() {
                 borderRadius: 4,
                 border: '1px solid',
                 borderColor: 'divider',
-                boxShadow: 'none',
-                backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.8)',
+                backgroundColor: (theme) => 
+                  theme.palette.mode === 'dark' 
+                    ? 'rgba(30, 30, 35, 0.7)' 
+                    : 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(20px)',
-                backgroundImage: 'radial-gradient(at 70% 20%, rgba(106, 27, 154, 0.05) 0px, transparent 50%)',
+                backgroundImage: (theme) => 
+                  theme.palette.mode === 'dark'
+                    ? 'radial-gradient(at 70% 20%, rgba(106, 27, 154, 0.15) 0px, transparent 50%)'
+                    : 'radial-gradient(at 70% 20%, rgba(106, 27, 154, 0.05) 0px, transparent 50%)',
                 boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
               }} 
             />
@@ -389,9 +418,15 @@ export default function HomePage() {
                 borderRadius: 4,
                 border: '1px solid',
                 borderColor: 'divider',
-                backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.8)',
+                backgroundColor: (theme) => 
+                  theme.palette.mode === 'dark' 
+                    ? 'rgba(30, 30, 35, 0.7)' 
+                    : 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(20px)',
-                backgroundImage: 'radial-gradient(at 100% 80%, rgba(106, 27, 154, 0.05) 0px, transparent 50%)',
+                backgroundImage: (theme) => 
+                  theme.palette.mode === 'dark'
+                    ? 'radial-gradient(at 100% 80%, rgba(106, 27, 154, 0.15) 0px, transparent 50%)'
+                    : 'radial-gradient(at 100% 80%, rgba(106, 27, 154, 0.05) 0px, transparent 50%)',
                 boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
               }}
             >

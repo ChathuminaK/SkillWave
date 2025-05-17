@@ -4,7 +4,8 @@ import {
   AppBar, Toolbar, Typography, Box, Container, Button, Avatar,
   IconButton, Drawer, List, ListItem, ListItemIcon, ListItemText,
   Divider, useMediaQuery, useTheme, Badge, Menu, MenuItem, Tooltip,
-  Popover, Paper, ListItemAvatar, Typography as MuiTypography
+  Popover, Paper, ListItemAvatar, Typography as MuiTypography,
+  Switch, FormControlLabel
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -19,16 +20,20 @@ import {
   PersonAdd as RegisterIcon,
   Comment as CommentIcon,
   Favorite as LikeIcon,
-  Person as PersonIcon
+  Person as PersonIcon,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon,
 } from '@mui/icons-material';
 import { useQuery, useQueryClient } from 'react-query';
 import { AuthContext } from '../contexts/AuthContext';
+import { ThemeContext } from '../contexts/ThemeContext';
 import { getFullImageUrl } from '../utils/imageUtils';
 import { notificationApi } from '../services/api';
 import { format } from 'date-fns';
 
 export default function Layout() {
   const { currentUser, isAuthenticated, logout } = useContext(AuthContext);
+  const { darkMode, toggleDarkMode } = useContext(ThemeContext);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
   const [notificationsAnchor, setNotificationsAnchor] = useState(null);
@@ -155,6 +160,12 @@ export default function Layout() {
             </ListItem>
           </>
         )}
+        <ListItem button onClick={toggleDarkMode}>
+          <ListItemIcon>
+            {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+          </ListItemIcon>
+          <ListItemText primary={darkMode ? "Light Mode" : "Dark Mode"} />
+        </ListItem>
       </List>
     </Box>
   );
@@ -179,7 +190,7 @@ export default function Layout() {
         elevation={0}
         sx={{
           backdropFilter: 'blur(10px)',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backgroundColor: darkMode ? 'rgba(30, 30, 35, 0.8)' : 'rgba(255, 255, 255, 0.9)',
           borderBottom: '1px solid',
           borderColor: 'divider',
           color: 'text.primary',
@@ -213,6 +224,22 @@ export default function Layout() {
           >
             SkillWave
           </Typography>
+          
+          <Tooltip title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+            <IconButton
+              onClick={toggleDarkMode}
+              sx={{ 
+                ml: 1,
+                backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+                color: darkMode ? '#fff' : '#000',
+                '&:hover': {
+                  backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+                }
+              }}
+            >
+              {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+          </Tooltip>
           
           {isAuthenticated ? (
             <>
@@ -407,6 +434,12 @@ export default function Layout() {
                   </ListItemIcon>
                   Edit Profile
                 </MenuItem>
+                <MenuItem onClick={toggleDarkMode} sx={{ py: 1.5 }}>
+                  <ListItemIcon>
+                    {darkMode ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+                  </ListItemIcon>
+                  {darkMode ? "Light Mode" : "Dark Mode"}
+                </MenuItem>
                 <Divider />
                 <MenuItem onClick={handleLogout} sx={{ py: 1.5 }}>
                   <ListItemIcon>
@@ -458,13 +491,26 @@ export default function Layout() {
         }}
         sx={{
           display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { width: 280, borderRadius: '0 16px 16px 0' },
+          '& .MuiDrawer-paper': { 
+            width: 280, 
+            borderRadius: '0 16px 16px 0',
+            backgroundColor: darkMode ? '#1e1e1e' : '#ffffff',
+          },
         }}
       >
         {drawer}
       </Drawer>
 
-      <Container component="main" sx={{ py: 4, flexGrow: 1 }}>
+      <Container 
+        component="main" 
+        sx={{ 
+          py: 4, 
+          flexGrow: 1,
+          minHeight: '100vh',
+          backgroundColor: darkMode ? '#121212' : '#f9fafc',
+          color: darkMode ? '#e0e0e0' : 'inherit'
+        }}
+      >
         <Outlet />
       </Container>
 
@@ -472,7 +518,7 @@ export default function Layout() {
         component="footer" 
         sx={{ 
           py: 4,
-          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+          backgroundColor: darkMode ? 'rgba(30, 30, 35, 0.7)' : 'rgba(255, 255, 255, 0.7)',
           backdropFilter: 'blur(10px)',
           borderTop: '1px solid',
           borderColor: 'divider',
